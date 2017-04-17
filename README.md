@@ -17,22 +17,27 @@ Após importar o banco para o MySQl.
 Acesse a pasta raiz do projeto, edite o arquivo 'config.php' e altere as configurações conforme o seu ambiente:
 
 //Configuração do Banco de dados
+
 $host = "localhost";
 $user = "root";
 $pass = "";
 $d_b = "livro_caixa";
 
 //Título do seu livro Caixa, geralmente seu nome
+
 $lc_titulo="Alexandre LLemes";
 
 //Autenticação simples
+
 $usuario="admin";
 $senha="123";
 
 ---------------------------------------
+
 Dados de acesso
 Email: admin
 Senha: 123
+
 ---------------------------------------
 
 
