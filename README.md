@@ -1,5 +1,4 @@
 # Livro Caixa 
-=======
 
 Livro Caixa é um sistema simples baseado em PHP/MySQL para o controle mensal de seu caixa.
 
@@ -12,12 +11,10 @@ Algumas melhorias:
 ﻿Seguem intruções de instalação e configuração
 ---------------------------------------
 
----------------------------------------
 O arquivo para criação do banco de dados é o livro_caixa.sql. 
----------------------------------------
 
----------------------------------------
-Dentro da pasta raiz do projeto edite o arquivo 'config.php' e altere as configurações conforme o seu ambiente:
+Após importar o banco para o MySQl.
+Acesse a pasta raiz do projeto, edite o arquivo 'config.php' e altere as configurações conforme o seu ambiente:
 
 //Configuração do Banco de dados
 $host = "localhost";
