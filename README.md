@@ -1,15 +1,15 @@
 # Livro Caixa 
-Controle de Livro Caixa
 =======
-*(for English read below)*
 
 Livro Caixa é um sistema simples baseado em PHP/MySQL para o controle mensal de seu caixa.
-Foi baseado no sistema Livro Caixa de "Felipe Ismael Barth" (fibbarth) - https://github.com/fibbarth
+
+Teve como idéia inicial o projeto Livro-Caixa de Felipe Ismael Barth (fibbarth) - https://github.com/fibbarth
 
 Algumas melhorias:
 * Inclusão da Bootstrap e modificação de alguns códigos para tentar trazer de forma simples o aplicativo para uso no mobile.
 
-﻿Intruções de instalação e configuração
+
+﻿Seguem intruções de instalação e configuração
 ---------------------------------------
 
 ---------------------------------------
