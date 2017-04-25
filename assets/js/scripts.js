@@ -33,3 +33,26 @@ jQuery(document).ready(function() {
     
     
 });
+
+function recoverPassword() {
+
+	var emailInput = $('#emailInput').val();
+
+	if (!emailInput) {
+		alert('E-Mail deve ser informado!');
+	}
+	
+	$.ajax({
+		method : "POST",
+		url : "process.php",
+		data : {
+			emailInput : emailInput
+		}
+	}).done(function(msg) {
+		alert("Data Saved: " + msg);
+	}).fail(function() {
+		alert("Aconteceu algum erro ao enviar o E-Mail. Error");
+	}).always(function() {
+		alert("E-Mail enviado com sucesso! Complete!");
+	});
+}

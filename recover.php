@@ -2,14 +2,9 @@
 session_start();
 set_time_limit(0);
 
-$pagina_login = 1;
-
 include 'config.php';
 include 'functions.php';
 
-if (isset($_GET['sair'])) {
-    $_SESSION['logado'] = "";
-}
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -22,61 +17,44 @@ if (isset($_GET['sair'])) {
     <meta name="AUDIENCE" content="all"/>
     <meta name="RATING" content="GENERAL"/>
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="assets/css/form-elements.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
-
-    <link href="css/normalize.css" rel="stylesheet" type="text/css"/>
-
-    <script src="js/jquery-2.2.4.min.js"></script>
-
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
-
-    <script language="javascript" src="scripts.js"></script>
 </head>
 
 <body>
+
 <br>
-<div class="container" >
+<hr>
+<div class="container">
     <div class="row">
-        <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3">
-            <div class="alert-placeholder"></div>
-            <div class="panel panel-success">
-
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-xs-6">
-                            <a href="login.php" class="active" id="login-form-link">Login</a>
-                        </div>
-                        <div class="col-xs-6">
-                            <a href="#" id="register-form-link">Registro</a>
-                        </div>
-                    </div>
-                    <hr>
-                </div>
-
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="text-center">
-                                <form id="register-form" autocomplete="off" role="form" method="post" action="process.php">
-                                    <div class="form-group">
-                                        <label for="email">Digite o endereço de E-Mail</label>
-                                        <input id="email" class="form-control" type="email" required="" autocomplete="off" value="" placeholder="Email" tabindex="1"
-                                               name="email">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="text-center">
+                          <h3><i class="fa fa-lock fa-4x"></i></h3>
+                          <h2 class="text-center">Forgot Password?</h2>
+                          <p>You can reset your password here.</p>
+                            <div class="panel-body">
+                              
+                              <form class="form" id="recover-form" autocomplete="off" role="form" method="post" action="process.php">
+                                <fieldset>
+                                  <div class="form-group">
+                                    <div class="input-group">
+                                      <span class="input-group-addon"><i class="glyphicon glyphicon-envelope color-blue"></i></span>
+                                      
+                                      <input id="emailInput" name="emailInput" placeholder="email address" class="form-control" oninvalid="setCustomValidity('Please enter a valid email address!')" onchange="try{setCustomValidity('')}catch(e){}" required="" type="email" autofocus >
                                     </div>
-                                    <div class="form-group">
-                                        <div class="row">
-                                            <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-12 col-xs-12">
-                                                <input id="recover-submit" class="form-control btn btn-success" type="submit" value="Recupere a conta" tabindex="2" name="recover-submit">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <input id="token" class="hide" type="hidden" value="80327595e28d381b4bdc1715c8381272" name="token">
-                                </form>
+                                  </div>
+                                  <div class="form-group">
+                                    <input class="btn btn-lg btn-primary btn-block" value="Send My Password" type="button" onClick="recoverPassword();" >
+                                  </div>
+                                </fieldset>
+                              </form>
+                              
                             </div>
                         </div>
                     </div>
@@ -85,5 +63,12 @@ if (isset($_GET['sair'])) {
         </div>
     </div>
 </div>
+
+        <!-- Javascript -->
+        <script src="assets/js/jquery-1.11.1.min.js"></script>
+        <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+        <script src="assets/js/jquery.backstretch.min.js"></script>
+        <script src="assets/js/scripts.js"></script>
+        
 </body>
 </html>

@@ -1,5 +1,7 @@
 ﻿Intruções de instalação e configuração
 ---------------------------------------
+Copie o pacote e instale-o em se computador
+Realize as configurações do config.php e divirta-se.
 
 ---------------------------------------
 O arquivo para criação do banco de dados é o livro_caixa.sql. 
@@ -10,21 +12,18 @@ Dentro da pasta raiz do projeto edite o arquivo 'config.php' e altere as configu
 
 //Configuração do Banco de dados
 $host = "localhost";
-$user = "root";
-$pass = "";
+$user = "livrocaixa";
+$pass = "123456";
 $d_b = "livro_caixa";
 
 //Título do seu livro Caixa, geralmente seu nome
-$lc_titulo="Alexandre LLemes";
+$lc_titulo="Livro Caixa";
 
-//Autenticação simples
-$usuario="admin";
-$senha="123";
 
 ---------------------------------------
 Dados de acesso
-Email: admin
-Senha: 123
+Email: admin@admin.com
+Senha: 123456
 ---------------------------------------
 
 

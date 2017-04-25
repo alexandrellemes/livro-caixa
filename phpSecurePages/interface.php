@@ -24,7 +24,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Bootstrap Login Form Template</title>
+        <title>Livro Caixa Login</title>
 
         <!-- CSS -->
         <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300,500">
@@ -94,6 +94,9 @@
 	                        	</a>
 	                        	<a class="btn btn-link-2" href="#">
 	                        		<i class="fa fa-google-plus"></i> Google Plus
+	                        	</a>
+	                        	<a class="btn btn-link-2" href="recover.php">
+	                        		<i class="fa fa-unlock"></i> Esqueci minha senha
 	                        	</a>
                         	</div>
                         </div>
