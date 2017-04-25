@@ -2,10 +2,16 @@
 
 Livro Caixa é um sistema simples baseado em PHP/MySQL para o controle mensal de seu caixa.
 
-Teve como idéia inicial o projeto Livro-Caixa de Felipe Ismael Barth (fibbarth) - https://github.com/fibbarth
+Teve como idéia inicial o projeto Livro-Caixa de Felipe Ismael Barth (fibbarth)
+https://github.com/fibbarth
 
 Algumas melhorias:
-* Inclusão da Bootstrap e modificação de alguns códigos para tentar trazer de forma simples o aplicativo para uso no mobile.
+* Inclusão da Bootstrap
+* Inclusão do phpSecurePages
+* Autenticação no banco com md5 na senha
+* Algumas modificações para facilitar o uso mobile
+* Modelagem do banco
+* O arquivo de modelagem e banco estão na pasta <Instalar>.
 
 
 ﻿Seguem intruções de instalação e configuração
@@ -19,26 +25,22 @@ Acesse a pasta raiz do projeto, edite o arquivo 'config.php' e altere as configu
 //Configuração do Banco de dados
 
 $host = "localhost";
-$user = "root";
-$pass = "";
+$user = "livrocaixa";
+$pass = "123456";
 $d_b = "livro_caixa";
 
 //Título do seu livro Caixa, geralmente seu nome
 
-$lc_titulo="Alexandre LLemes";
+$lc_titulo="Título de sua aplicação";
 
-//Autenticação simples
-
-$usuario="admin";
-$senha="123";
 
 ---------------------------------------
 
 Dados de acesso
 
-Email: admin
+Email: admin@admin.com
 
-Senha: 123
+Senha: 123456
 
 ---------------------------------------
 

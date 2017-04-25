@@ -36,7 +36,7 @@ $noDetailedMessages = false;
   // the system for existing users.
 
 /****** Password Encryption ******/
-$passwordEncryptedWithMD5 = false;          // Set this to true if the passwords are encrypted with the MD5 algorithm
+$passwordEncryptedWithMD5 = true;          // Set this to true if the passwords are encrypted with the MD5 algorithm
 
 /****** Choose Language ******/
 $languageFile = 'lng_brazilian-portuguese.php';        // Choose from one of the 40 language files in the /lng directory

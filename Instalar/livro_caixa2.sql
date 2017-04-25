@@ -77,6 +77,8 @@ DEFAULT CHARACTER SET = latin1;
 
 USE `livro_caixa` ;
 
+insert into livro_caixa.users values(1,'admin@admin.com', md5('123456'), 1);
+
 -- -----------------------------------------------------
 -- Placeholder table for view `livro_caixa`.`view_categorias`
 -- -----------------------------------------------------
@@ -119,9 +121,7 @@ select * from users;
 CREATE USER 'livrocaixa' IDENTIFIED BY '123456';
 
 GRANT ALL ON `mydb`.* TO 'livrocaixa';
-GRANT ALL ON `adminlte`.* TO 'livrocaixa';
-GRANT ALL ON `cadastro`.* TO 'livrocaixa';
-GRANT ALL ON `estoque_laravel`.* TO 'livrocaixa';
+
 GRANT ALL ON `livro_caixa`.* TO 'livrocaixa';
 
 SET SQL_MODE=@OLD_SQL_MODE;
