@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', true);
-error_reporting(E_ALL);
-
 /**
  * This example shows settings to use when sending via Google's Gmail servers.
  * Atualize:
@@ -15,11 +12,35 @@ if (!isset($_POST['emailInput'])) {
 	exit;
 }
 
+ini_set('display_errors', true);
+error_reporting(E_ALL);
+
+/** Configuracao para o phpSecurePages **/
+$cfgProgDir =  'phpSecurePages/';
+include($cfgProgDir . "secure.php");
+
+if (isset($_GET['sair'])) {
+	$logout = true;
+	include('phpSecurePages/objects/logout.php');
+}
+
+//session_start();
+set_time_limit(0);
+
+include 'config.php';
+include 'functions.php';
+
 $userEmail = $_POST['emailInput'];
 
 // Verifica o e-mail informado no banco de dados.
-if (true) {
-	$userPassword = 'database.password';
+$qr=mysqli_query($conn, "select count(1) from livro_caixa.users where user = '$userEmail'");
+if (mysqli_num_rows($qr) > 0) {
+	$userPassword = random_password(8);
+	mysqli_query($conn, "UPDATE livro_caixa.users SET password='$userPassword' WHERE user = '$userEmail'");
+	echo mysqli_error($conn);
+} else {
+	echo 'E-Mail não encontrado!';
+	exit;
 }
 
 //SMTP needs accurate times, and the PHP time zone MUST be set
