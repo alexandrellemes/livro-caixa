@@ -1,0 +1,160 @@
+============================================
+=        phpSecurePages Change Log         =
+=        http://phpSecurePages.com         =
+============================================
+
+------ v 0.44 beta --- 04/2/2015 ------
+* fixed issue with not being able to log in after failed login
+
+------ v 0.43 beta --- 05/1/2013 ------
+* changed all php tags to 'long' tags to support servers that do not support 'short' tags
+
+------ v 0.42 beta --- 04/26/2013 ------
+* fixed issue with not being able to log in after failed login
+
+------ v 0.41 beta --- 04/17/2013 ------
+* replaced all PHP depricated functions and features
+* rewrote code so that no PHP notices are thrown
+* prevent sql injection attacks by sanitizing db input with mysql_real_escape_string()
++ added the ability of the login interface to pass both GET and POST variables to destination page after successful login
+
+------ v 0.40 beta --- 03/15/2013 ------
++ added support for IP-based access
+
+------ v 0.31 beta --- 01/24/2013 ------
+* refactored code to work under PHP5
+* removed support for PHP3
+* changed look of login interface
+
+
+------ v 0.30 beta --- 09/04/2006 ------
+* enabled code to read MD5 encrypted passwords
+* fixed issues with functions being loaded twice in frames
+* redone entire program layout to prepare for phpSecurePages version 2
++ added Croatian, Macedonian and Luxembourgish language files
+
+
+------ v 0.29 beta --- 15/07/2005 ------
+* fixed an important security issue where it was possible to execute
+  code on the server running phpSP if php was configured to accept
+  files from remote servers.
+  All users must upgrade!
+ 
+
+------ v 0.28 beta --- 09/08/2002 ------
++ added Euskara, Serbian, Lithuanian, Portuguese and Arabic language
+  files
+* fixed issues with some servers giving wrong directory location info
+* fixed broken backward compatibility problems with php 4.2.0 and up
++ website moved to new address. It now can be found here:
+  http://www.phpSecurePages.com
+
+
+------ v 0.27 beta --- 12/02/2002 ------
+* Small bug and information changes
+
+
+------ v 0.26 beta --- 02/10/2001 ------
++ added the possibility to buy a commercial license online
++ added Estonian, Japanese and Latvian language files
+
+
+------ v 0.25 beta --- 22/04/2001 ------
+* fixed an important security issue where it was possible to execute
+  code on the server running phpSP if using unix and if php was
+  configured to accept files from remote servers.
+  All users must upgrade!
++ added Indonesian and Slovenian language files
+
+
+------ v 0.24 beta --- 08/04/2001 ------
+* fixed the problem with sessions not always working in php3
++ added two Finnish language files
+
+
+------ v 0.23 beta --- 13/03/2001 ------
++ added Swedish, Norwegian, Icelandic and Czech language files
++ added a new backgroundimage "bg_lock2.gif" from Jan Hutter
+
+
+------ v 0.22 beta --- 06/03/2001 ------
+* fixed an important security problem. Users could trick
+  the program to show the procted page.
+  All users must upgrade!
++ added a Frequently Asked Questions list to the homepage
+
+
+------ v 0.21 beta --- 04/02/2001 ------
+* GET variables located in the URL are now no longer removed during
+  login
++ added URL support for sites using the HTTPS protocol
++ added Bulgarian and Slovak language files
+
+
+------ v 0.20 beta --- 22/10/2000 ------
++ opened a homepage for phpSP at http://www.phpSecurePages.f2s.com/
+* fixed an error which removed the session during login on some PHP3
+  servers. PHP3 users should upgrade
++ added Polish language file
+
+
+------ v 0.19 beta --- 23/09/2000 ------
+* improved user level system with config for minimum user levels
++ added Russian, Romanian and Catalan language files
+
+
+------ v 0.18 beta --- 09/09/2000 ------
+* fixed an error which caused login names in a database to be case-
+  insensitive
++ added Danish language file
+
+
+------ v 0.17 beta --- 21/08/2000 ------
+* fixed some session coding
++ added some information to the license
++ added Latin America Spanish and Chinese GB language files
+
+
+------ v 0.16 beta --- 10/07/2000 ------
+* fixed and improved code throughout the program
+  (including a PHP3 session bug, some variable-name conflicts
+  and layout improvements for Mozilla 5)
++ added Chinese Big5 language file
+
+
+------ v 0.15 beta --- 06/07/2000 ------
++ added PHP3 session functionality:
+  phpSecurePages can now be used with PHP3 or PHP4!
+* fixed some PHP4 session coding
++ added MySQL dump file
+* changed the log-out procedure.
+  If you update from a previous version, don't forget to change the
+  log-out coding, because the old code is no longer working
+
+
+------ v 0.14 beta --- 25/06/2000 ------
++ added choice between high security or user-friendly setting
++ added French and Spanish language files
+
+
+------ v 0.13 beta --- 16/06/2000 ------
+* fixed fatal link problem which occurred if you installed PHP as an
+  Apache module
+* fixed some layout problems for Netscape users
++ added configuration of background image function
++ added rotate background image function
++ added new background image
++ added Brazilian-Portuguese, Italian and German language files
+
+
+------ v 0.12 beta --- 12/06/2000 ------
++ added multi language support
++ added Dutch language file
+
+
+------ v 0.11 beta --- 10/06/2000 ------
++ added documentation
++ added user levels functionality
++ added ID and userLevel variables output
+* improved session coding
+* fixed location error of images
