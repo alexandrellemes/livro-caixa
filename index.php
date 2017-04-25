@@ -1,8 +1,18 @@
 <?php
+
 ini_set('display_errors', true);
 error_reporting(E_ALL);
 
-session_start();
+/** Configuracao para o phpSecurePages **/
+$cfgProgDir =  'phpSecurePages/';
+include($cfgProgDir . "secure.php");
+
+if (isset($_GET['sair'])) {
+	$logout = true;
+	include('phpSecurePages/objects/logout.php');
+}
+
+//session_start();
 set_time_limit(0);
 
 include 'config.php';
@@ -510,7 +520,7 @@ if (isset($_GET['filtro_cat'])){
 
 $qr=mysqli_query($conn, "SELECT * FROM lc_movimento WHERE mes='$mes_hoje' && ano='$ano_hoje' $filtros ORDER By dia");
 $cont=0;
-while ($row=mysqli_fetch_array($qr)){
+while ($row=mysqli_fetch_array($qr)) {
 $cont++;
 
 $cat=$row['cat'];
@@ -576,7 +586,7 @@ while ($row2=mysqli_fetch_array($qr2)){
 <hr size="1" />
 <em>Livro Caixa - <strong><?php echo $lc_titulo?></strong></em>
 
-    <button class="btn btn-default btn-lg" type="button" onclick="window.location.href = 'login.php?sair' ">
+    <button class="btn btn-default btn-lg" type="button" onclick="window.location.href = 'index.php?sair' ">
         <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
         Saída
     </button>
