@@ -29,6 +29,7 @@ include 'functions.php';
 <br>
 <hr>
 <div class="container">
+  <div class="alert" id="info"></div>
     <div class="row">
         <div class="row">
             <div class="col-md-4 col-md-offset-4">

@@ -31,7 +31,7 @@ jQuery(document).ready(function() {
     	
     });
     
-    $('#valor').maskMoney();
+//    $('#valor').maskMoney();
     
 });
 
@@ -48,12 +48,16 @@ function recoverPassword() {
 		url : "process.php",
 		data : {
 			emailInput : emailInput
-		}
-	}).done(function(msg) {
-		alert("Data Saved: " + msg);
-	}).fail(function() {
-		alert("Aconteceu algum erro ao enviar o E-Mail. Error");
-	}).always(function() {
-		alert("E-Mail enviado com sucesso! Complete!");
+		},
+		success: function(data) { alert(data);
+	         var $title = $('<h1>').text(data.talks[0].talk_title);
+	         var $description = $('<p>').text(data.talks[0].talk_description);
+	         $('#info')
+	            .append($title)
+	            .append($description);
+	    },
+	    error: function(data) {
+	          $('#info').html('<p>An error has occurred</p>');
+	       },
 	});
 }

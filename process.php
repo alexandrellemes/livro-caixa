@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', true);
+error_reporting(E_ALL);
+
 /**
  * This example shows settings to use when sending via Google's Gmail servers.
  * Atualize:
@@ -12,18 +15,6 @@ if (!isset($_POST['emailInput'])) {
 	exit;
 }
 
-ini_set('display_errors', true);
-error_reporting(E_ALL);
-
-/** Configuracao para o phpSecurePages **/
-$cfgProgDir =  'phpSecurePages/';
-include($cfgProgDir . "secure.php");
-
-if (isset($_GET['sair'])) {
-	$logout = true;
-	include('phpSecurePages/objects/logout.php');
-}
-
 //session_start();
 set_time_limit(0);
 
@@ -33,7 +24,7 @@ include 'functions.php';
 $userEmail = $_POST['emailInput'];
 
 // Verifica o e-mail informado no banco de dados.
-$qr=mysqli_query($conn, "select count(1) from livro_caixa.users where user = '$userEmail'");
+$qr=mysqli_query($conn, "select id from livro_caixa.users where user = '$userEmail'");
 if (mysqli_num_rows($qr) > 0) {
 	$userPassword = random_password(8);
 	mysqli_query($conn, "UPDATE livro_caixa.users SET password=md5('$userPassword') WHERE user = '$userEmail'");
@@ -47,10 +38,10 @@ if (mysqli_num_rows($qr) > 0) {
 //This should be done in your php.ini, but this is how to do it if you don't have access to that
 date_default_timezone_set('Etc/UTC');
 
-require 'PHPMailer/PHPMailerAutoload.php';
+require  'vendor/phpmailer/phpmailer/PHPMailerAutoload.php';
 
 //Create a new PHPMailer instance
-$mail = new PHPMailer;
+$mail = new PHPMailer();
 
 //Tell PHPMailer to use SMTP
 $mail->isSMTP();
@@ -127,8 +118,14 @@ $mail->AltBody = 'This is a plain-text message body';
 $mail->addAttachment('PHPMailer/examples/images/phpmailer_mini.png');
 
 //send the message, check for errors
-if (!$mail->send()) {
-	echo "Mailer Error: " . $mail->ErrorInfo;
-} else {
-	echo "Message sent!";
+try {
+	if ($mail->send()) {
+		echo 'Mensagem enviada com sucesso!';
+	} else {
+		echo "Erro ao enviar a mensagem! $mail->ErrorInfo";
+	}
+	
+} catch (Exception $e) {
+	echo "Houve erro no envio: " . $e->getMessage();
 }
+
