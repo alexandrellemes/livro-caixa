@@ -12,12 +12,18 @@ Algumas melhorias:
 * Algumas modificações para facilitar o uso mobile
 * Modelagem do banco
 * O arquivo de modelagem e banco estão na pasta <Instalar>.
+* Utilização da biblioteca PHPMailer para a recuperação de senha
 
 
-﻿Seguem intruções de instalação e configuração
----------------------------------------
+﻿Seguem instruções de instalação e configuração
+----------------------------------------------
 
-O arquivo para criação do banco de dados é o livro_caixa.sql. 
+O arquivo para criação do banco de dados é o livro_caixa.sql.
+O arquivo com a modelagm está na pasta Instalar
+
+Rode o COMPOSER a partir da raiz para instalar as dependências:
+
+# composer install
 
 Após importar o banco para o MySQl.
 Acesse a pasta raiz do projeto, edite o arquivo 'config.php' e altere as configurações conforme o seu ambiente:
