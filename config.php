@@ -7,11 +7,7 @@ $pass = "123456";
 $d_b = "livro_caixa";
 
 //Título do seu livro Caixa, geralmente seu nome
-$lc_titulo="Alexandre LLemes";
-
-//Autenticação simples
-$usuario="admin";
-$senha="123";
+$lc_titulo="Seu Nome";
 
 //////////////////////////////////////
 //Não altere a partir daqui!

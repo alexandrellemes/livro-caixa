@@ -36,7 +36,7 @@ $userEmail = $_POST['emailInput'];
 $qr=mysqli_query($conn, "select count(1) from livro_caixa.users where user = '$userEmail'");
 if (mysqli_num_rows($qr) > 0) {
 	$userPassword = random_password(8);
-	mysqli_query($conn, "UPDATE livro_caixa.users SET password='$userPassword' WHERE user = '$userEmail'");
+	mysqli_query($conn, "UPDATE livro_caixa.users SET password=md5('$userPassword') WHERE user = '$userEmail'");
 	echo mysqli_error($conn);
 } else {
 	echo 'E-Mail não encontrado!';

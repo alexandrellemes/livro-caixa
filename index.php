@@ -21,7 +21,7 @@ include 'functions.php';
 if (isset($_GET['acao']) && $_GET['acao'] == 'apagar') {
     $id = $_GET['id'];
 
-    mysqli_query($conn, "DELETE FROM lc_movimento WHERE id='$id'");
+    mysqli_query($conn, "DELETE FROM movimentos WHERE id='$id'");
     echo mysqli_error($conn);
 
     header("Location: ?mes=" . $_GET['mes'] . "&ano=" . $_GET['ano'] . "&ok=2");
@@ -32,7 +32,7 @@ if (isset($_POST['acao']) && $_POST['acao'] == 'editar_cat') {
     $id = $_POST['id'];
     $nome = $_POST['nome'];
 
-    mysqli_query($conn, "UPDATE lc_cat SET nome='$nome' WHERE id='$id'");
+    mysqli_query($conn, "UPDATE categorias SET nome='$nome' WHERE id='$id'");
     echo mysqli_error($conn);
 
     header("Location: ?mes=" . $_GET['mes'] . "&ano=" . $_GET['ano'] . "&cat_ok=3");
@@ -42,13 +42,15 @@ if (isset($_POST['acao']) && $_POST['acao'] == 'editar_cat') {
 if (isset($_GET['acao']) && $_GET['acao'] == 'apagar_cat') {
     $id = $_GET['id'];
 
-    $qr=mysqli_query($conn, "SELECT c.id FROM lc_movimento m, lc_cat c WHERE c.id=m.cat && c.id=$id");
+    $qr=mysqli_query($conn, "SELECT c.id FROM movimentos m, categorias c WHERE c.id=m.cat && c.id=$id");
     if (mysqli_num_rows($qr)>0){
         header("Location: ?mes=" . $_GET['mes'] . "&ano=" . $_GET['ano'] . "&cat_err=1");
         exit();
     }
 
-    mysqli_query($conn, "DELETE FROM lc_cat WHERE id='$id'");
+    $sql = "DELETE FROM categorias WHERE id='$id'";
+    
+    mysqli_query($conn, $sql);
     echo mysqli_error($conn);
 
     header("Location: ?mes=" . $_GET['mes'] . "&ano=" . $_GET['ano'] . "&cat_ok=2");
@@ -59,11 +61,15 @@ if (isset($_POST['acao']) && $_POST['acao'] == 'editar_mov') {
     $id = $_POST['id'];
     $dia = $_POST['dia'];
     $tipo = $_POST['tipo'];
-    $cat = $_POST['cat'];
+    $cat = $_POST['categoria'];
     $descricao = $_POST['descricao'];
     $valor = str_replace(",", ".", $_POST['valor']);
 
-    mysqli_query($conn, "UPDATE lc_movimento SET dia='$dia', tipo='$tipo', cat='$cat', descricao='$descricao', valor='$valor' WHERE id='$id'");
+    $sql = "UPDATE movimentos 
+               SET dia='$dia', tipo='$tipo', categoria_id='$cat', descricao='$descricao', valor='$valor' 
+            WHERE id='$id'";
+    
+    mysqli_query($conn, $sql);
     echo mysqli_error($conn);
 
     header("Location: ?mes=" . $_GET['mes'] . "&ano=" . $_GET['ano'] . "&ok=3");
@@ -74,7 +80,7 @@ if (isset($_POST['acao']) && $_POST['acao'] == 2) {
 
     $nome = $_POST['nome'];
 
-    mysqli_query($conn, "INSERT INTO lc_cat (nome) values ('$nome')");
+    mysqli_query($conn, "INSERT INTO categorias (nome) values ('$nome')");
 
     echo mysqli_error($conn);
 
@@ -86,7 +92,7 @@ if (isset($_POST['acao']) && $_POST['acao'] == 1) {
 
     $data = $_POST['data'];
     $tipo = $_POST['tipo'];
-    $cat = $_POST['cat'];
+    $cat = $_POST['categoria'];
     $descricao = $_POST['descricao'];
     $valor = str_replace(",", ".", $_POST['valor']);
 
@@ -95,7 +101,10 @@ if (isset($_POST['acao']) && $_POST['acao'] == 1) {
     $mes = $t[1];
     $ano = $t[2];
 
-    mysqli_query($conn, "INSERT INTO lc_movimento (dia,mes,ano,tipo,descricao,valor,cat) values ('$dia','$mes','$ano','$tipo','$descricao','$valor','$cat')");
+    $sql = "INSERT INTO movimentos (dia,mes,ano,tipo,descricao,valor,categoria_id)
+            values ('$dia','$mes','$ano','$tipo','$descricao','$valor','$cat')";
+    
+    mysqli_query($conn, $sql);
 
     echo mysqli_error($conn);
 
@@ -132,12 +141,6 @@ else
 
     <link href="css/normalize.css" rel="stylesheet" type="text/css" />
 
-    <script src="js/jquery-2.2.4.min.js"></script>
-
-        <!-- Latest compiled and minified JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
-
-    <script language="javascript" src="scripts.js"></script>
 </head>
 <body style="padding:10px">
 
@@ -298,7 +301,7 @@ Nome: <input type="text" name="nome" size="20" maxlength="50" />
             <td valign="top" align="right">
                 <b>Editar/Remover Categorias:</b><br/><br/>
 <?php
-$qr=mysqli_query($conn, "SELECT id, nome FROM lc_cat");
+$qr=mysqli_query($conn, "SELECT id, nome FROM categorias");
 while ($row=mysqli_fetch_array($qr)){
 ?>
                 <div id="editar2_cat_<?php echo $row['id']?>">
@@ -329,7 +332,7 @@ while ($row=mysqli_fetch_array($qr)){
 <div style=" background-color:#F1F1F1; padding:10px; border:1px solid #999; margin:5px; display:none" id="add_movimento">
 <h3>Adicionar Movimento</h3>
 <?php
-$qr=mysqli_query($conn, "SELECT * FROM lc_cat");
+$qr=mysqli_query($conn, "SELECT * FROM categorias");
 if (mysqli_num_rows($qr)==0)
 	echo "Adicione ao menos uma categoria";
 
@@ -351,7 +354,7 @@ else{
 <br />
 
 <strong>Categoria:</strong><br />
-<select name="cat">
+<select name="categoria">
 <?php
 while ($row=mysqli_fetch_array($qr)){
 ?>
@@ -368,9 +371,9 @@ while ($row=mysqli_fetch_array($qr)){
 <br />
 <br />
 
-<strong>Valor:</strong><br />
-R$<input type="text" name="valor" size="8" maxlength="10" />
-
+<strong>Valor:</strong>
+<br />
+<input type="text" name="valor" id="valor" size="8" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," />
 <br />
 <br />
 
@@ -386,11 +389,11 @@ R$<input type="text" name="valor" size="8" maxlength="10" />
 <td align="left" valign="top" width="auto" style="background-color:#D3FFE2">
 
 <?php
-$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM lc_movimento WHERE tipo=1 && mes='$mes_hoje' && ano='$ano_hoje'");
+$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 && mes='$mes_hoje' && ano='$ano_hoje'");
 $row=mysqli_fetch_array($qr);
 $entradas=$row['total'];
 
-$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM lc_movimento WHERE tipo=0 && mes='$mes_hoje' && ano='$ano_hoje'");
+$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 && mes='$mes_hoje' && ano='$ano_hoje'");
 $row=mysqli_fetch_array($qr);
 $saidas=$row['total'];
 
@@ -433,11 +436,11 @@ $resultado_mes=$entradas-$saidas;
 
 <?php
 
-$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM lc_movimento WHERE tipo=1 ");
+$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 ");
 $row=mysqli_fetch_array($qr);
 $entradas=$row['total'];
 
-$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM lc_movimento WHERE tipo=0 ");
+$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 ");
 $row=mysqli_fetch_array($qr);
 $saidas=$row['total'];
 
@@ -485,7 +488,7 @@ $resultado_geral=$entradas-$saidas;
     Filtrar por categoria:  <select name="filtro_cat" onchange="form_filtro_cat.submit()">
 <option value="">Tudo</option>
 <?php
-$qr=mysqli_query($conn, "SELECT DISTINCT c.id, c.nome FROM lc_cat c, lc_movimento m WHERE m.cat=c.id && m.mes='$mes_hoje' && m.ano='$ano_hoje'");
+$qr=mysqli_query($conn, "SELECT DISTINCT c.id, c.nome FROM categorias c, movimentos m WHERE m.cat=c.id && m.mes='$mes_hoje' && m.ano='$ano_hoje'");
 while ($row=mysqli_fetch_array($qr)){
 ?>
 <option <?php if (isset($_GET['filtro_cat']) && $_GET['filtro_cat']==$row['id'])echo "selected=selected"?> value="<?php echo $row['id']?>"><?php echo $row['nome']?></option>
@@ -505,11 +508,11 @@ if (isset($_GET['filtro_cat'])){
 	if ($_GET['filtro_cat']!=''){
 		$filtros="&& cat='".$_GET['filtro_cat']."'";
 
-                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM lc_movimento WHERE tipo=1 && mes='$mes_hoje' && ano='$ano_hoje' $filtros");
+                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 && mes='$mes_hoje' && ano='$ano_hoje' $filtros");
                 $row=mysqli_fetch_array($qr);
                 $entradas=$row['total'];
 
-                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM lc_movimento WHERE tipo=0 && mes='$mes_hoje' && ano='$ano_hoje' $filtros");
+                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 && mes='$mes_hoje' && ano='$ano_hoje' $filtros");
                 $row=mysqli_fetch_array($qr);
                 $saidas=$row['total'];
 
@@ -518,44 +521,50 @@ if (isset($_GET['filtro_cat'])){
         }
 }
 
-$qr=mysqli_query($conn, "SELECT * FROM lc_movimento WHERE mes='$mes_hoje' && ano='$ano_hoje' $filtros ORDER By dia");
+$qr=mysqli_query($conn, "SELECT * FROM movimentos WHERE mes='$mes_hoje' && ano='$ano_hoje' $filtros ORDER By dia");
 $cont=0;
 while ($row=mysqli_fetch_array($qr)) {
 $cont++;
 
-$cat=$row['cat'];
-$qr2=mysqli_query($conn, "SELECT nome FROM lc_cat WHERE id='$cat'");
+$cat = $row['categoria_id'];
+$qr2=mysqli_query($conn, "SELECT nome FROM categorias WHERE id='$cat'");
 $row2=mysqli_fetch_array($qr2);
 $categoria=$row2['nome'];
 
 ?>
 <tr style="background-color:<?php if ($cont%2==0) echo "#F1F1F1"; else echo "#E0E0E0"?>" >
-<td align="center" width="15"><?php echo $row['dia']?></td>
-<td><?php echo $row['descricao']?> <em>(<a href="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>&filtro_cat=<?php echo $cat?>"><?php echo $categoria?></a>)</em> <a href="javascript:;" style="font-size:10px; color:#666" onclick="document.getElementById('editar_mov_<?php echo $row['id']?>').style.display='';  " title="Editar">[editar]</a></td>
-<td align="right"><strong style="color:<?php if ($row['tipo']==0) echo "#C00"; else echo "#030"?>"><?php if ($row['tipo']==0) echo "-"; else echo "+"?><?php echo formata_dinheiro($row['valor'])?></strong></td>
+  <td align="center" width="15"><?php echo $row['dia']?></td>
+  <td><?php echo $row['descricao']?> <em>(<a href="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>&filtro_cat=<?php echo $cat?>"><?php echo $categoria?></a>)</em> <a href="javascript:;" style="font-size:10px; color:#666" onclick="document.getElementById('editar_mov_<?php echo $row['id']?>').style.display='';  " title="Editar">[editar]</a></td>
+  <td align="right"><strong style="color:<?php if ($row['tipo']==0) echo "#C00"; else echo "#030"?>"><?php if ($row['tipo']==0) echo "-"; else echo "+"?><?php echo formata_dinheiro($row['valor'])?></strong></td>
 </tr>
-    <tr style="display:none; background-color:<?php if ($cont%2==0) echo "#F1F1F1"; else echo "#E0E0E0"?>" id="editar_mov_<?php echo $row['id']?>">
+<tr style="display:none; background-color:<?php if ($cont%2==0) echo "#F1F1F1"; else echo "#E0E0E0"?>" id="editar_mov_<?php echo $row['id']?>">
         <td colspan="3">
             <hr/>
             <form method="post" action="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>">
             <input type="hidden" name="acao" value="editar_mov" />
             <input type="hidden" name="id" value="<?php echo $row['id']?>" />
 
-            <b>Dia:</b> <input type="text" name="dia" size="3" maxlength="2" value="<?php echo $row['dia']?>" />&nbsp;|&nbsp;
-            <b>Tipo:</b> <label for="tipo_receita<?php echo $row['id']?>" style="color:#030"><input <?php if($row['tipo']==1) echo "checked=checked"?> type="radio" name="tipo" value="1" id="tipo_receita<?php echo $row['id']?>" /> Receita</label>&nbsp; <label for="tipo_despesa<?php echo $row['id']?>" style="color:#C00"><input <?php if($row['tipo']==0) echo "checked=checked"?> type="radio" name="tipo" value="0" id="tipo_despesa<?php echo $row['id']?>" /> Despesa</label>&nbsp;|&nbsp;
+            <b>Dia:</b>
+            <input type="text" name="dia" size="3" maxlength="2" value="<?php echo $row['dia']?>" />
+            </br>
+            <b>Tipo:</b>
+             <label for="tipo_receita<?php echo $row['id']?>" style="color:#030"><input <?php if($row['tipo']==1) echo "checked=checked"?> type="radio" name="tipo" value="1" id="tipo_receita<?php echo $row['id']?>" /> Receita</label>&nbsp; <label for="tipo_despesa<?php echo $row['id']?>" style="color:#C00"><input <?php if($row['tipo']==0) echo "checked=checked"?> type="radio" name="tipo" value="0" id="tipo_despesa<?php echo $row['id']?>" /> Despesa</label>
+             </br>
             <b>Categoria:</b>
-<select name="cat">
-<?php
-$qr2=mysqli_query($conn, "SELECT * FROM lc_cat");
-while ($row2=mysqli_fetch_array($qr2)){
-?>
-    <option <?php if($row2['id']==$row['cat']) echo "selected"?> value="<?php echo $row2['id']?>"><?php echo $row2['nome']?></option>
-<?php }?>
-</select>&nbsp;|&nbsp;
-            <b>Valor:</b> R$<input type="text" value="<?php echo $row['valor']?>" name="valor" size="8" maxlength="10" />
+			<select name="categoria">
+			<?php
+			$qr2=mysqli_query($conn, "SELECT * FROM categorias");
+			while ($row2=mysqli_fetch_array($qr2)){
+			?>
+			    <option <?php if($row2['id']==$row['categoria_id']) echo "selected"?> value="<?php echo $row2['id']?>"><?php echo $row2['nome']?></option>
+			<?php }?>
+			</select>
+			</br>
+            <b>Valor:</b>
+            <input type="text" value="<?php echo $row['valor']?>" name="valor" id="valor" size="8" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," />
             <br/>
             <b>Descricao:</b> <input type="text" name="descricao" value="<?php echo $row['descricao']?>" size="70" maxlength="255" />
-
+</br>
             <input type="submit" class="input" value="Alterar" />
             </form>
             <div style="text-align: right">
@@ -563,7 +572,7 @@ while ($row2=mysqli_fetch_array($qr2)){
             </div>
             <hr/>
         </td>
-    </tr>
+</tr>
 
 <?php
 }
@@ -595,5 +604,18 @@ while ($row2=mysqli_fetch_array($qr2)){
 </table>
 </div>
     </div>
+    <script src="js/jquery-2.2.4.min.js"></script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+    
+    <script src="js/jquery.maskMoney.js" type="text/javascript"></script>
+
+    <script language="javascript" src="scripts.js"></script>
 </body>
+<script>
+  $(function() {
+    $('#valor').maskMoney();
+  })
+</script>
 </html>
