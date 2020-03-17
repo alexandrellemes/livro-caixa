@@ -19,23 +19,28 @@ Algumas melhorias:
 ----------------------------------------------
 
 O arquivo para criação do banco de dados é o livro_caixa.sql.
+
 O arquivo com a modelagm está na pasta Instalar
 
-Rode o COMPOSER a partir da raiz para instalar as dependências:
+Rode o COMPOSER, a partir da raiz da aplicação, para instalar as dependências:
 
-# composer install
+# $ composer install
 
 Após importar o banco para o MySQl.
+
 Acesse a pasta raiz do projeto, edite o arquivo 'config.php' e altere as configurações conforme o seu ambiente:
 
-//Configuração do Banco de dados
+###Configuração do Banco de dados
 
 $host = "localhost";
+
 $user = "livrocaixa";
+
 $pass = "123456";
+
 $d_b = "livro_caixa";
 
-//Título do seu livro Caixa, geralmente seu nome
+###Título do seu livro Caixa, geralmente seu nome
 
 $lc_titulo="Título de sua aplicação";
 
@@ -57,9 +62,10 @@ Senha: 123456
 * [jquery/jquery-ui](https://github.com/jquery/jquery-ui) 
 
 ### Requerimento
-* PHP >= 5.4.0 <= 5.6
+* PHP >= 5.6.0
 * MySQL
 
 ### Créditos
-* Alexandre LLemes - alexandre.llemes@gmail.com
+* Augusto Cezar Perez augustoperez696@live.com
+* Alexandre LLemes - alexandre.llemes@gmail.com (postei no meu(Augusto) git porque esse cara não deixa fazer up de correção no sistema falho dele.)
 
