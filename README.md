@@ -30,7 +30,7 @@ Após importar o banco para o MySQl.
 
 Acesse a pasta raiz do projeto, edite o arquivo 'config.php' e altere as configurações conforme o seu ambiente:
 
-###Configuração do Banco de dados
+### Configuração do Banco de dados
 
 $host = "localhost";
 
