@@ -51,7 +51,7 @@ class XliffFileDumper extends FileDumper
      */
     protected function format(MessageCatalogue $messages, $domain)
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.8 and will be removed in 3.0. Use the formatCatalogue() method instead.', E_USER_DEPRECATED);
+        @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.8 and will be removed in 3.0. Use the formatCatalogue() method instead.', E_USER_DEPRECATED);
 
         return $this->formatCatalogue($messages, $domain);
     }
@@ -188,6 +188,6 @@ class XliffFileDumper extends FileDumper
      */
     private function hasMetadataArrayInfo($key, $metadata = null)
     {
-        return null !== $metadata && array_key_exists($key, $metadata) && ($metadata[$key] instanceof \Traversable || is_array($metadata[$key]));
+        return null !== $metadata && array_key_exists($key, $metadata) && ($metadata[$key] instanceof \Traversable || \is_array($metadata[$key]));
     }
 }

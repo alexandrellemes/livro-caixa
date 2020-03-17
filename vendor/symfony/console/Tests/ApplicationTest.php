@@ -13,22 +13,22 @@ namespace Symfony\Component\Console\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleExceptionEvent;
+use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Helper\FormatterHelper;
+use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Console\Tester\ApplicationTester;
-use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\Console\Event\ConsoleExceptionEvent;
-use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class ApplicationTest extends TestCase
@@ -39,6 +39,7 @@ class ApplicationTest extends TestCase
     {
         self::$fixturesPath = realpath(__DIR__.'/Fixtures/');
         require_once self::$fixturesPath.'/FooCommand.php';
+        require_once self::$fixturesPath.'/FooOptCommand.php';
         require_once self::$fixturesPath.'/Foo1Command.php';
         require_once self::$fixturesPath.'/Foo2Command.php';
         require_once self::$fixturesPath.'/Foo3Command.php';
@@ -48,6 +49,8 @@ class ApplicationTest extends TestCase
         require_once self::$fixturesPath.'/BarBucCommand.php';
         require_once self::$fixturesPath.'/FooSubnamespaced1Command.php';
         require_once self::$fixturesPath.'/FooSubnamespaced2Command.php';
+        require_once self::$fixturesPath.'/TestTiti.php';
+        require_once self::$fixturesPath.'/TestToto.php';
     }
 
     protected function normalizeLineBreaks($text)
@@ -223,6 +226,14 @@ class ApplicationTest extends TestCase
         $application->add(new \FooCommand());
         $application->add(new \Foo2Command());
         $application->findNamespace('f');
+    }
+
+    public function testFindNonAmbiguous()
+    {
+        $application = new Application();
+        $application->add(new \TestTiti());
+        $application->add(new \TestToto());
+        $this->assertEquals('test-toto', $application->find('test')->getName());
     }
 
     /**
@@ -611,6 +622,22 @@ class ApplicationTest extends TestCase
         $this->assertStringEqualsFile(self::$fixturesPath.'/application_renderexception_escapeslines.txt', $tester->getDisplay(true), '->renderException() escapes lines containing formatting');
     }
 
+    public function testRenderExceptionLineBreaks()
+    {
+        $application = $this->getMockBuilder('Symfony\Component\Console\Application')->setMethods(array('getTerminalWidth'))->getMock();
+        $application->setAutoExit(false);
+        $application->expects($this->any())
+            ->method('getTerminalWidth')
+            ->will($this->returnValue(120));
+        $application->register('foo')->setCode(function () {
+            throw new \InvalidArgumentException("\n\nline 1 with extra spaces        \nline 2\n\nline 4\n");
+        });
+        $tester = new ApplicationTester($application);
+
+        $tester->run(array('command' => 'foo'), array('decorated' => false));
+        $this->assertStringEqualsFile(self::$fixturesPath.'/application_renderexception_linebreaks.txt', $tester->getDisplay(true), '->renderException() keep multiple line breaks');
+    }
+
     public function testRun()
     {
         $application = new Application();
@@ -739,12 +766,36 @@ class ApplicationTest extends TestCase
         $application = $this->getMockBuilder('Symfony\Component\Console\Application')->setMethods(array('doRun'))->getMock();
         $application->setAutoExit(false);
         $application->expects($this->once())
-             ->method('doRun')
-             ->will($this->throwException($exception));
+            ->method('doRun')
+            ->will($this->throwException($exception));
 
         $exitCode = $application->run(new ArrayInput(array()), new NullOutput());
 
         $this->assertSame(4, $exitCode, '->run() returns integer exit code extracted from raised exception');
+    }
+
+    public function testRunDispatchesIntegerExitCode()
+    {
+        $passedRightValue = false;
+
+        // We can assume here that some other test asserts that the event is dispatched at all
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('console.terminate', function (ConsoleTerminateEvent $event) use (&$passedRightValue) {
+            $passedRightValue = (4 === $event->getExitCode());
+        });
+
+        $application = new Application();
+        $application->setDispatcher($dispatcher);
+        $application->setAutoExit(false);
+
+        $application->register('test')->setCode(function (InputInterface $input, OutputInterface $output) {
+            throw new \Exception('', 4);
+        });
+
+        $tester = new ApplicationTester($application);
+        $tester->run(array('command' => 'test'));
+
+        $this->assertTrue($passedRightValue, '-> exit code 4 was passed in the console.terminate event');
     }
 
     public function testRunReturnsExitCodeOneForExceptionCodeZero()
@@ -754,12 +805,36 @@ class ApplicationTest extends TestCase
         $application = $this->getMockBuilder('Symfony\Component\Console\Application')->setMethods(array('doRun'))->getMock();
         $application->setAutoExit(false);
         $application->expects($this->once())
-             ->method('doRun')
-             ->will($this->throwException($exception));
+            ->method('doRun')
+            ->will($this->throwException($exception));
 
         $exitCode = $application->run(new ArrayInput(array()), new NullOutput());
 
         $this->assertSame(1, $exitCode, '->run() returns exit code 1 when exception code is 0');
+    }
+
+    public function testRunDispatchesExitCodeOneForExceptionCodeZero()
+    {
+        $passedRightValue = false;
+
+        // We can assume here that some other test asserts that the event is dispatched at all
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('console.terminate', function (ConsoleTerminateEvent $event) use (&$passedRightValue) {
+            $passedRightValue = (1 === $event->getExitCode());
+        });
+
+        $application = new Application();
+        $application->setDispatcher($dispatcher);
+        $application->setAutoExit(false);
+
+        $application->register('test')->setCode(function (InputInterface $input, OutputInterface $output) {
+            throw new \Exception();
+        });
+
+        $tester = new ApplicationTester($application);
+        $tester->run(array('command' => 'test'));
+
+        $this->assertTrue($passedRightValue, '-> exit code 1 was passed in the console.terminate event');
     }
 
     /**
@@ -981,15 +1056,28 @@ class ApplicationTest extends TestCase
         $this->assertContains('before.foo.caught.after.', $tester->getDisplay());
     }
 
+    public function testRunDispatchesAllEventsWithExceptionInListener()
+    {
+        $dispatcher = $this->getDispatcher();
+        $dispatcher->addListener('console.command', function () {
+            throw new \RuntimeException('foo');
+        });
+
+        $application = new Application();
+        $application->setDispatcher($dispatcher);
+        $application->setAutoExit(false);
+
+        $application->register('foo')->setCode(function (InputInterface $input, OutputInterface $output) {
+            $output->write('foo.');
+        });
+
+        $tester = new ApplicationTester($application);
+        $tester->run(array('command' => 'foo'));
+        $this->assertContains('before.caught.after.', $tester->getDisplay());
+    }
+
     public function testRunWithError()
     {
-        if (method_exists($this, 'expectException')) {
-            $this->expectException('Exception');
-            $this->expectExceptionMessage('dymerr');
-        } else {
-            $this->setExpectedException('Exception', 'dymerr');
-        }
-
         $application = new Application();
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
@@ -1001,7 +1089,13 @@ class ApplicationTest extends TestCase
         });
 
         $tester = new ApplicationTester($application);
-        $tester->run(array('command' => 'dym'));
+
+        try {
+            $tester->run(array('command' => 'dym'));
+            $this->fail('Error expected.');
+        } catch (\Error $e) {
+            $this->assertSame('dymerr', $e->getMessage());
+        }
     }
 
     /**
@@ -1148,32 +1242,6 @@ class ApplicationTest extends TestCase
         $this->assertSame(array($width, 80), $application->getTerminalDimensions());
     }
 
-    protected function getDispatcher($skipCommand = false)
-    {
-        $dispatcher = new EventDispatcher();
-        $dispatcher->addListener('console.command', function (ConsoleCommandEvent $event) use ($skipCommand) {
-            $event->getOutput()->write('before.');
-
-            if ($skipCommand) {
-                $event->disableCommand();
-            }
-        });
-        $dispatcher->addListener('console.terminate', function (ConsoleTerminateEvent $event) use ($skipCommand) {
-            $event->getOutput()->writeln('after.');
-
-            if (!$skipCommand) {
-                $event->setExitCode(113);
-            }
-        });
-        $dispatcher->addListener('console.exception', function (ConsoleExceptionEvent $event) {
-            $event->getOutput()->write('caught.');
-
-            $event->setException(new \LogicException('caught.', $event->getExitCode(), $event->getException()));
-        });
-
-        return $dispatcher;
-    }
-
     public function testSetRunCustomDefaultCommand()
     {
         $command = new \FooCommand();
@@ -1184,16 +1252,31 @@ class ApplicationTest extends TestCase
         $application->setDefaultCommand($command->getName());
 
         $tester = new ApplicationTester($application);
-        $tester->run(array());
-        $this->assertEquals('interact called'.PHP_EOL.'called'.PHP_EOL, $tester->getDisplay(), 'Application runs the default set command if different from \'list\' command');
+        $tester->run(array(), array('interactive' => false));
+        $this->assertEquals('called'.PHP_EOL, $tester->getDisplay(), 'Application runs the default set command if different from \'list\' command');
 
         $application = new CustomDefaultCommandApplication();
         $application->setAutoExit(false);
 
         $tester = new ApplicationTester($application);
-        $tester->run(array());
+        $tester->run(array(), array('interactive' => false));
 
-        $this->assertEquals('interact called'.PHP_EOL.'called'.PHP_EOL, $tester->getDisplay(), 'Application runs the default set command if different from \'list\' command');
+        $this->assertEquals('called'.PHP_EOL, $tester->getDisplay(), 'Application runs the default set command if different from \'list\' command');
+    }
+
+    public function testSetRunCustomDefaultCommandWithOption()
+    {
+        $command = new \FooOptCommand();
+
+        $application = new Application();
+        $application->setAutoExit(false);
+        $application->add($command);
+        $application->setDefaultCommand($command->getName());
+
+        $tester = new ApplicationTester($application);
+        $tester->run(array('--fooopt' => 'opt'), array('interactive' => false));
+
+        $this->assertEquals('called'.PHP_EOL.'opt'.PHP_EOL, $tester->getDisplay(), 'Application runs the default set command if different from \'list\' command');
     }
 
     /**
@@ -1211,6 +1294,55 @@ class ApplicationTest extends TestCase
 
         $inputStream = $application->getHelperSet()->get('question')->getInputStream();
         $this->assertEquals($tester->getInput()->isInteractive(), @posix_isatty($inputStream));
+    }
+
+    protected function getDispatcher($skipCommand = false)
+    {
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener('console.command', function (ConsoleCommandEvent $event) use ($skipCommand) {
+            $event->getOutput()->write('before.');
+
+            if ($skipCommand) {
+                $event->disableCommand();
+            }
+        });
+        $dispatcher->addListener('console.terminate', function (ConsoleTerminateEvent $event) use ($skipCommand) {
+            $event->getOutput()->writeln('after.');
+
+            if (!$skipCommand) {
+                $event->setExitCode(ConsoleCommandEvent::RETURN_CODE_DISABLED);
+            }
+        });
+        $dispatcher->addListener('console.exception', function (ConsoleExceptionEvent $event) {
+            $event->getOutput()->write('caught.');
+
+            $event->setException(new \LogicException('caught.', $event->getExitCode(), $event->getException()));
+        });
+
+        return $dispatcher;
+    }
+
+    /**
+     * @requires PHP 7
+     */
+    public function testErrorIsRethrownIfNotHandledByConsoleErrorEventWithCatchingEnabled()
+    {
+        $application = new Application();
+        $application->setAutoExit(false);
+        $application->setDispatcher(new EventDispatcher());
+
+        $application->register('dym')->setCode(function (InputInterface $input, OutputInterface $output) {
+            new \UnknownClass();
+        });
+
+        $tester = new ApplicationTester($application);
+
+        try {
+            $tester->run(array('command' => 'dym'));
+            $this->fail('->run() should rethrow PHP errors if not handled via ConsoleErrorEvent.');
+        } catch (\Error $e) {
+            $this->assertSame($e->getMessage(), 'Class \'UnknownClass\' not found');
+        }
     }
 }
 

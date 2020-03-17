@@ -12,11 +12,11 @@
 namespace Symfony\Component\DependencyInjection\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\Scope;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\Exception\InactiveScopeException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+use Symfony\Component\DependencyInjection\Scope;
 
 class ContainerTest extends TestCase
 {
@@ -134,8 +134,8 @@ class ContainerTest extends TestCase
     public function testSet()
     {
         $sc = new Container();
-        $sc->set('foo', $foo = new \stdClass());
-        $this->assertSame($foo, $sc->get('foo'), '->set() sets a service');
+        $sc->set('._. \\o/', $foo = new \stdClass());
+        $this->assertSame($foo, $sc->get('._. \\o/'), '->set() sets a service');
     }
 
     public function testSetWithNullResetTheService()
@@ -177,7 +177,7 @@ class ContainerTest extends TestCase
         $c->set('foo', $foo = new \stdClass(), 'foo');
 
         $scoped = $this->getField($c, 'scopedServices');
-        $this->assertTrue(isset($scoped['foo']['foo']), '->set() sets a scoped service');
+        $this->assertArrayHasKey('foo', $scoped['foo'], '->set() sets a scoped service');
         $this->assertSame($foo, $scoped['foo']['foo'], '->set() sets a scoped service');
     }
 
@@ -400,14 +400,14 @@ class ContainerTest extends TestCase
         $container->set('a', $a, 'bar');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertTrue(isset($scoped['bar']['a']));
+        $this->assertArrayHasKey('a', $scoped['bar']);
         $this->assertSame($a, $scoped['bar']['a']);
         $this->assertTrue($container->has('a'));
 
         $container->leaveScope('foo');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertFalse(isset($scoped['bar']));
+        $this->assertArrayNotHasKey('bar', $scoped);
         $this->assertFalse($container->isScopeActive('foo'));
         $this->assertFalse($container->has('a'));
     }
@@ -433,14 +433,14 @@ class ContainerTest extends TestCase
         $container->set('a', $a, 'foo');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertTrue(isset($scoped['foo']['a']));
+        $this->assertArrayHasKey('a', $scoped['foo']);
         $this->assertSame($a, $scoped['foo']['a']);
         $this->assertTrue($container->has('a'));
 
         $container->enterScope('foo');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertFalse(isset($scoped['a']));
+        $this->assertArrayNotHasKey('a', $scoped);
         $this->assertTrue($container->isScopeActive('foo'));
         $this->assertFalse($container->isScopeActive('bar'));
         $this->assertFalse($container->has('a'));
@@ -475,14 +475,14 @@ class ContainerTest extends TestCase
         $container->set('a', $a, 'bar');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertTrue(isset($scoped['bar']['a']));
+        $this->assertArrayHasKey('a', $scoped['bar']);
         $this->assertSame($a, $scoped['bar']['a']);
         $this->assertTrue($container->has('a'));
 
         $container->enterScope('bar');
 
         $scoped = $this->getField($container, 'scopedServices');
-        $this->assertFalse(isset($scoped['a']));
+        $this->assertArrayNotHasKey('a', $scoped);
         $this->assertTrue($container->isScopeActive('foo'));
         $this->assertTrue($container->isScopeActive('bar'));
         $this->assertFalse($container->has('a'));
@@ -698,7 +698,7 @@ class ContainerTest extends TestCase
     {
         $class = new \ReflectionClass('Symfony\Component\DependencyInjection\Container');
         $clone = $class->getMethod('__clone');
-        if (PHP_VERSION_ID >= 50400) {
+        if (\PHP_VERSION_ID >= 50400) {
             $this->assertFalse($class->isCloneable());
         }
         $this->assertTrue($clone->isPrivate());

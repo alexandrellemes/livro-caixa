@@ -15,21 +15,21 @@ require_once __DIR__.'/Fixtures/includes/classes.php';
 require_once __DIR__.'/Fixtures/includes/ProjectExtension.php';
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
-use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Exception\InactiveScopeException;
+use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
-use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Scope;
-use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\CustomDefinition;
 use Symfony\Component\ExpressionLanguage\Expression;
 
@@ -49,7 +49,7 @@ class ContainerBuilderTest extends TestCase
 
         $builder->setDefinition('foobar', $foo = new Definition('FooBarClass'));
         $this->assertEquals($foo, $builder->getDefinition('foobar'), '->getDefinition() returns a service definition if defined');
-        $this->assertTrue($builder->setDefinition('foobar', $foo = new Definition('FooBarClass')) === $foo, '->setDefinition() implements a fluid interface by returning the service reference');
+        $this->assertSame($builder->setDefinition('foobar', $foo = new Definition('FooBarClass')), $foo, '->setDefinition() implements a fluid interface by returning the service reference');
 
         $builder->addDefinitions($defs = array('foobar' => new Definition('FooBarClass')));
         $this->assertEquals(array_merge($definitions, $defs), $builder->getDefinitions(), '->addDefinitions() adds the service definitions');
@@ -72,7 +72,7 @@ class ContainerBuilderTest extends TestCase
         $definition->setDeprecated(true);
 
         $builder = new ContainerBuilder();
-        $builder->createService($definition, 'deprecated_foo');
+        $builder->createService($definition, new \SplObjectStorage(), 'deprecated_foo');
     }
 
     public function testRegister()
@@ -120,7 +120,7 @@ class ContainerBuilderTest extends TestCase
             $this->assertEquals('Circular reference detected for service "baz", path: "baz".', $e->getMessage(), '->get() throws a LogicException if the service has a circular reference to itself');
         }
 
-        $this->assertTrue($builder->get('bar') === $builder->get('bar'), '->get() always returns the same instance if the service is shared');
+        $this->assertSame($builder->get('bar'), $builder->get('bar'), '->get() always returns the same instance if the service is shared');
     }
 
     public function testNonSharedServicesReturnsDifferentInstances()
@@ -129,6 +129,38 @@ class ContainerBuilderTest extends TestCase
         $builder->register('bar', 'stdClass')->setShared(false);
 
         $this->assertNotSame($builder->get('bar'), $builder->get('bar'));
+    }
+
+    /**
+     * @expectedException \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @dataProvider provideBadId
+     */
+    public function testBadAliasId($id)
+    {
+        $builder = new ContainerBuilder();
+        $builder->setAlias($id, 'foo');
+    }
+
+    /**
+     * @expectedException \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @dataProvider provideBadId
+     */
+    public function testBadDefinitionId($id)
+    {
+        $builder = new ContainerBuilder();
+        $builder->setDefinition($id, new Definition('Foo'));
+    }
+
+    public function provideBadId()
+    {
+        return [
+            [''],
+            ["\0"],
+            ["\r"],
+            ["\n"],
+            ["'"],
+            ['ab\\'],
+        ];
     }
 
     /**
@@ -189,7 +221,7 @@ class ContainerBuilderTest extends TestCase
         $this->assertFalse($builder->hasAlias('foobar'), '->hasAlias() returns false if the alias does not exist');
         $this->assertEquals('foo', (string) $builder->getAlias('bar'), '->getAlias() returns the aliased service');
         $this->assertTrue($builder->has('bar'), '->setAlias() defines a new service');
-        $this->assertTrue($builder->get('bar') === $builder->get('foo'), '->setAlias() creates a service that is an alias to another one');
+        $this->assertSame($builder->get('bar'), $builder->get('foo'), '->setAlias() creates a service that is an alias to another one');
 
         try {
             $builder->setAlias('foobar', 'foobar');
@@ -234,8 +266,8 @@ class ContainerBuilderTest extends TestCase
         $builder->setAliases(array('bar' => 'foo', 'foobar' => 'foo'));
 
         $aliases = $builder->getAliases();
-        $this->assertTrue(isset($aliases['bar']));
-        $this->assertTrue(isset($aliases['foobar']));
+        $this->assertArrayHasKey('bar', $aliases);
+        $this->assertArrayHasKey('foobar', $aliases);
     }
 
     public function testAddAliases()
@@ -245,8 +277,8 @@ class ContainerBuilderTest extends TestCase
         $builder->addAliases(array('foobar' => 'foo'));
 
         $aliases = $builder->getAliases();
-        $this->assertTrue(isset($aliases['bar']));
-        $this->assertTrue(isset($aliases['foobar']));
+        $this->assertArrayHasKey('bar', $aliases);
+        $this->assertArrayHasKey('foobar', $aliases);
     }
 
     public function testSetReplacesAlias()
@@ -278,7 +310,7 @@ class ContainerBuilderTest extends TestCase
         $builderCompilerPasses = $builder->getCompiler()->getPassConfig()->getPasses();
         $builder->addCompilerPass($this->getMockBuilder('Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface')->getMock());
 
-        $this->assertCount(count($builder->getCompiler()->getPassConfig()->getPasses()) - 1, $builderCompilerPasses);
+        $this->assertCount(\count($builder->getCompiler()->getPassConfig()->getPasses()) - 1, $builderCompilerPasses);
     }
 
     public function testCreateService()
@@ -301,7 +333,7 @@ class ContainerBuilderTest extends TestCase
         $foo1 = $builder->get('foo1');
 
         $this->assertSame($foo1, $builder->get('foo1'), 'The same proxy is retrieved on multiple subsequent calls');
-        $this->assertSame('Bar\FooClass', get_class($foo1));
+        $this->assertSame('Bar\FooClass', \get_class($foo1));
     }
 
     public function testCreateServiceClass()
@@ -506,7 +538,7 @@ class ContainerBuilderTest extends TestCase
         $this->assertEquals(array('foo', 'bar', 'baz'), array_keys($container->getDefinitions()), '->merge() merges definitions already defined ones');
 
         $aliases = $container->getAliases();
-        $this->assertTrue(isset($aliases['alias_for_foo']));
+        $this->assertArrayHasKey('alias_for_foo', $aliases);
         $this->assertEquals('foo', (string) $aliases['alias_for_foo']);
 
         $container = new ContainerBuilder();
@@ -657,7 +689,7 @@ class ContainerBuilderTest extends TestCase
         $container->setResourceTracking(false);
 
         $container->registerExtension($extension = new \ProjectExtension());
-        $this->assertTrue($container->getExtension('project') === $extension, '->registerExtension() registers an extension');
+        $this->assertSame($container->getExtension('project'), $extension, '->registerExtension() registers an extension');
 
         $this->{method_exists($this, $_ = 'expectException') ? $_ : 'setExpectedException'}('LogicException');
         $container->getExtension('no_registered');
@@ -865,6 +897,28 @@ class ContainerBuilderTest extends TestCase
         $this->assertTrue($classInList);
     }
 
+    public function testInlinedDefinitions()
+    {
+        $container = new ContainerBuilder();
+
+        $definition = new Definition('BarClass');
+
+        $container->register('bar_user', 'BarUserClass')
+            ->addArgument($definition)
+            ->setProperty('foo', $definition);
+
+        $container->register('bar', 'BarClass')
+            ->setProperty('foo', $definition)
+            ->addMethodCall('setBaz', array($definition));
+
+        $barUser = $container->get('bar_user');
+        $bar = $container->get('bar');
+
+        $this->assertSame($barUser->foo, $barUser->bar);
+        $this->assertSame($bar->foo, $bar->getBaz());
+        $this->assertNotSame($bar->foo, $barUser->foo);
+    }
+
     public function testInitializePropertiesBeforeMethodCalls()
     {
         $container = new ContainerBuilder();
@@ -890,6 +944,27 @@ class ContainerBuilderTest extends TestCase
         $container->compile();
 
         $this->assertEquals('a', (string) $container->getDefinition('b')->getArgument(0));
+    }
+
+    /**
+     * This test checks the trigger of a deprecation note and should not be removed in major releases.
+     *
+     * @group legacy
+     * @expectedDeprecation The "foo" service is deprecated. You should stop using it, as it will soon be removed.
+     */
+    public function testPrivateServiceTriggersDeprecation()
+    {
+        $container = new ContainerBuilder();
+        $container->register('foo', 'stdClass')
+            ->setPublic(false)
+            ->setDeprecated(true);
+        $container->register('bar', 'stdClass')
+            ->setPublic(true)
+            ->setProperty('foo', new Reference('foo'));
+
+        $container->compile();
+
+        $container->get('bar');
     }
 }
 

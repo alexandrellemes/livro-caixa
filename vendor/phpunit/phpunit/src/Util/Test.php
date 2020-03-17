@@ -14,15 +14,17 @@ use PharIo\Version\VersionConstraintParser;
 use PHPUnit\Framework\CodeCoverageException;
 use PHPUnit\Framework\Exception;
 use PHPUnit\Framework\InvalidCoversTargetException;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\SelfDescribing;
 use PHPUnit\Framework\SkippedTestError;
+use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Warning;
 use PHPUnit\Runner\Version;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionMethod;
+use SebastianBergmann\Environment\OperatingSystem;
+use Traversable;
 
 /**
  * Test helpers.
@@ -34,8 +36,8 @@ class Test
     const REGEX_EXPECTED_EXCEPTION          = '(@expectedException\s+([:.\w\\\\x7f-\xff]+)(?:[\t ]+(\S*))?(?:[\t ]+(\S*))?\s*$)m';
     const REGEX_REQUIRES_VERSION            = '/@requires\s+(?P<name>PHP(?:Unit)?)\s+(?P<operator>[<>=!]{0,2})\s*(?P<version>[\d\.-]+(dev|(RC|alpha|beta)[\d\.])?)[ \t]*\r?$/m';
     const REGEX_REQUIRES_VERSION_CONSTRAINT = '/@requires\s+(?P<name>PHP(?:Unit)?)\s+(?P<constraint>[\d\t -.|~^]+)[ \t]*\r?$/m';
-    const REGEX_REQUIRES_OS                 = '/@requires\s+OS\s+(?P<value>.+?)[ \t]*\r?$/m';
-    const REGEX_REQUIRES                    = '/@requires\s+(?P<name>function|extension)\s+(?P<value>([^ ]+?))\s*(?P<operator>[<>=!]{0,2})\s*(?P<version>[\d\.-]+[\d\.]?)?[ \t]*\r?$/m';
+    const REGEX_REQUIRES_OS                 = '/@requires\s+(?P<name>OS(?:FAMILY)?)\s+(?P<value>.+?)[ \t]*\r?$/m';
+    const REGEX_REQUIRES                    = '/@requires\s+(?P<name>function|extension)\s+(?P<value>([^\s<>=!]+))\s*(?P<operator>[<>=!]{0,2})\s*(?P<version>[\d\.-]+[\d\.]?)?[ \t]*\r?$/m';
 
     const UNKNOWN = -1;
     const SMALL   = 0;
@@ -189,10 +191,9 @@ class Test
         $requires = [];
 
         if ($count = \preg_match_all(self::REGEX_REQUIRES_OS, $docComment, $matches)) {
-            $requires['OS'] = \sprintf(
-                '/%s/i',
-                \addcslashes($matches['value'][$count - 1], '/')
-            );
+            foreach (\range(0, $count - 1) as $i) {
+                $requires[$matches['name'][$i]] = $matches['value'][$i];
+            }
         }
 
         if ($count = \preg_match_all(self::REGEX_REQUIRES_VERSION, $docComment, $matches)) {
@@ -251,7 +252,7 @@ class Test
      * @param string $className
      * @param string $methodName
      *
-     * @return array
+     * @return string[]
      */
     public static function getMissingRequirements($className, $methodName)
     {
@@ -294,8 +295,15 @@ class Test
             }
         }
 
-        if (!empty($required['OS']) && !\preg_match($required['OS'], PHP_OS)) {
-            $missing[] = \sprintf('Operating system matching %s is required.', $required['OS']);
+        if (!empty($required['OSFAMILY']) && $required['OSFAMILY'] !== (new OperatingSystem())->getFamily()) {
+            $missing[] = \sprintf('Operating system %s is required.', $required['OSFAMILY']);
+        }
+
+        if (!empty($required['OS'])) {
+            $requiredOsPattern = \sprintf('/%s/i', \addcslashes($required['OS'], '/'));
+            if (!\preg_match($requiredOsPattern, PHP_OS)) {
+                $missing[] = \sprintf('Operating system matching %s is required.', $requiredOsPattern);
+            }
         }
 
         if (!empty($required['functions'])) {
@@ -347,7 +355,7 @@ class Test
      * @param string $className
      * @param string $methodName
      *
-     * @return array
+     * @return array|false
      */
     public static function getExpectedException($className, $methodName)
     {
@@ -415,10 +423,8 @@ class Test
      */
     private static function parseAnnotationContent($message)
     {
-        if (\strpos($message, '::') !== false && \count(\explode('::', $message)) == 2) {
-            if (\defined($message)) {
-                $message = \constant($message);
-            }
+        if ((\strpos($message, '::') !== false && \count(\explode('::', $message)) == 2) && \defined($message)) {
+            $message = \constant($message);
         }
 
         return $message;
@@ -517,8 +523,16 @@ class Test
                     $data = $dataProviderMethod->invoke($object, $methodName);
                 }
 
-                if ($data instanceof Iterator) {
-                    $data = \iterator_to_array($data);
+                if ($data instanceof Traversable) {
+                    $origData = $data;
+                    $data     = [];
+                    foreach ($origData as $key => $value) {
+                        if (\is_int($key)) {
+                            $data[] = $value;
+                        } else {
+                            $data[$key] = $value;
+                        }
+                    }
                 }
 
                 if (\is_array($data)) {
@@ -533,8 +547,8 @@ class Test
     /**
      * @param string $docComment full docComment string
      *
-     * @return array when @testWith annotation is defined
-     *               null  when @testWith annotation is omitted
+     * @return array|null array when @testWith annotation is defined,
+     *                    null when @testWith annotation is omitted
      *
      * @throws Exception when @testWith annotation is defined but cannot be parsed
      */
@@ -687,7 +701,7 @@ class Test
      * @param string $className
      * @param string $methodName
      *
-     * @return array
+     * @return array<string, bool|null>
      */
     public static function getBackupSettings($className, $methodName)
     {
@@ -742,7 +756,7 @@ class Test
      * @param string $className
      * @param string $methodName
      *
-     * @return bool
+     * @return ?bool
      */
     public static function getErrorHandlerSettings($className, $methodName)
     {
@@ -796,6 +810,7 @@ class Test
             foreach (['small', 'medium', 'large'] as $size) {
                 if (isset($annotations[$element][$size])) {
                     $groups[] = $size;
+
                     break 2;
                 }
             }
@@ -848,12 +863,17 @@ class Test
             $methodName
         );
 
-        if (isset($annotations['class']['runTestsInSeparateProcesses']) ||
-            isset($annotations['method']['runInSeparateProcess'])) {
-            return true;
-        }
+        return isset($annotations['class']['runTestsInSeparateProcesses']) || isset($annotations['method']['runInSeparateProcess']);
+    }
 
-        return false;
+    public static function getClassProcessIsolationSettings($className, $methodName)
+    {
+        $annotations = self::parseTestMethodAnnotations(
+            $className,
+            $methodName
+        );
+
+        return isset($annotations['class']['runClassInSeparateProcess']);
     }
 
     /**
@@ -862,7 +882,7 @@ class Test
      * @param string $className
      * @param string $methodName
      *
-     * @return bool
+     * @return ?bool
      */
     public static function getPreserveGlobalStateSettings($className, $methodName)
     {
@@ -938,7 +958,7 @@ class Test
      * @param string $methodName
      * @param string $settingName
      *
-     * @return bool
+     * @return ?bool
      */
     private static function getBooleanAnnotationSetting($className, $methodName, $settingName)
     {
@@ -947,27 +967,25 @@ class Test
             $methodName
         );
 
-        if (isset($annotations['class'][$settingName])) {
-            if ($annotations['class'][$settingName][0] == 'enabled') {
-                return true;
-            }
-
-            if ($annotations['class'][$settingName][0] == 'disabled') {
-                return false;
-            }
-        }
-
         if (isset($annotations['method'][$settingName])) {
-            if ($annotations['method'][$settingName][0] == 'enabled') {
+            if ($annotations['method'][$settingName][0] === 'enabled') {
                 return true;
             }
 
-            if ($annotations['method'][$settingName][0] == 'disabled') {
+            if ($annotations['method'][$settingName][0] === 'disabled') {
                 return false;
             }
         }
 
-        return;
+        if (isset($annotations['class'][$settingName])) {
+            if ($annotations['class'][$settingName][0] === 'enabled') {
+                return true;
+            }
+
+            if ($annotations['class'][$settingName][0] === 'disabled') {
+                return false;
+            }
+        }
     }
 
     /**
@@ -1103,12 +1121,14 @@ class Test
                 $result[$filename] = [];
             }
 
-            $result[$filename] = \array_unique(
-                \array_merge(
-                    $result[$filename],
-                    \range($reflector->getStartLine(), $reflector->getEndLine())
-                )
+            $result[$filename] = \array_merge(
+                $result[$filename],
+                \range($reflector->getStartLine(), $reflector->getEndLine())
             );
+        }
+
+        foreach ($result as $filename => $lineNumbers) {
+            $result[$filename] = \array_keys(\array_flip($lineNumbers));
         }
 
         return $result;
@@ -1131,7 +1151,7 @@ class Test
      */
     private static function isBeforeMethod(ReflectionMethod $method)
     {
-        return \preg_match('/@before\b/', $method->getDocComment());
+        return \preg_match('/@before\b/', $method->getDocComment()) > 0;
     }
 
     /**
@@ -1151,7 +1171,7 @@ class Test
      */
     private static function isAfterMethod(ReflectionMethod $method)
     {
-        return \preg_match('/@after\b/', $method->getDocComment());
+        return \preg_match('/@after\b/', $method->getDocComment()) > 0;
     }
 
     /**

@@ -11,11 +11,11 @@
 
 namespace Symfony\Component\Translation\Loader;
 
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Util\XmlUtils;
-use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Exception\InvalidResourceException;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\Translation\MessageCatalogue;
 
 /**
  * XliffFileLoader loads translations from XLIFF files.
@@ -90,7 +90,7 @@ class XliffFileLoader implements LoaderInterface
             $source = isset($attributes['resname']) && $attributes['resname'] ? $attributes['resname'] : $translation->source;
             // If the xlf file has another encoding specified, try to convert it because
             // simple_xml will always return utf-8 encoded values
-            $target = $this->utf8ToCharset((string) (isset($translation->target) ? $translation->target : $source), $encoding);
+            $target = $this->utf8ToCharset((string) (isset($translation->target) ? $translation->target : $translation->source), $encoding);
 
             $catalogue->set((string) $source, $target, $domain);
 
@@ -216,15 +216,19 @@ class XliffFileLoader implements LoaderInterface
     {
         $newPath = str_replace('\\', '/', __DIR__).'/schema/dic/xliff-core/xml.xsd';
         $parts = explode('/', $newPath);
+        $locationstart = 'file:///';
         if (0 === stripos($newPath, 'phar://')) {
             $tmpfile = tempnam(sys_get_temp_dir(), 'sf2');
             if ($tmpfile) {
                 copy($newPath, $tmpfile);
                 $parts = explode('/', str_replace('\\', '/', $tmpfile));
+            } else {
+                array_shift($parts);
+                $locationstart = 'phar:///';
             }
         }
-        $drive = '\\' === DIRECTORY_SEPARATOR ? array_shift($parts).'/' : '';
-        $newPath = 'file:///'.$drive.implode('/', array_map('rawurlencode', $parts));
+        $drive = '\\' === \DIRECTORY_SEPARATOR ? array_shift($parts).'/' : '';
+        $newPath = $locationstart.$drive.implode('/', array_map('rawurlencode', $parts));
 
         return str_replace($xmlUri, $newPath, $schemaSource);
     }
@@ -277,7 +281,7 @@ class XliffFileLoader implements LoaderInterface
 
             $namespace = $xliff->attributes->getNamedItem('xmlns');
             if ($namespace) {
-                if (substr_compare('urn:oasis:names:tc:xliff:document:', $namespace->nodeValue, 0, 34) !== 0) {
+                if (0 !== substr_compare('urn:oasis:names:tc:xliff:document:', $namespace->nodeValue, 0, 34)) {
                     throw new \InvalidArgumentException(sprintf('Not a valid XLIFF namespace "%s"', $namespace));
                 }
 

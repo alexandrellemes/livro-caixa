@@ -14,15 +14,16 @@ use AssertionError;
 use Countable;
 use Error;
 use PHP_Invoker;
+use PHP_Invoker_TimeoutException;
 use PHP_Timer;
-use PHPUnit_Framework_MockObject_Exception;
+use PHPUnit\Framework\MockObject\Exception as MockObjectException;
 use PHPUnit\Util\Blacklist;
 use PHPUnit\Util\InvalidArgumentHelper;
 use PHPUnit\Util\Printer;
 use ReflectionClass;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
-use SebastianBergmann\CodeCoverage\Exception as OriginalCodeCoverageException;
 use SebastianBergmann\CodeCoverage\CoveredCodeNotExecutedException as OriginalCoveredCodeNotExecutedException;
+use SebastianBergmann\CodeCoverage\Exception as OriginalCodeCoverageException;
 use SebastianBergmann\CodeCoverage\MissingCoversAnnotationException as OriginalMissingCoversAnnotationException;
 use SebastianBergmann\CodeCoverage\UnintentionallyCoveredCodeException;
 use SebastianBergmann\ResourceOperations\ResourceOperations;
@@ -677,14 +678,17 @@ class TestResult implements Countable
                 switch ($test->getSize()) {
                     case \PHPUnit\Util\Test::SMALL:
                         $_timeout = $this->timeoutForSmallTests;
+
                         break;
 
                     case \PHPUnit\Util\Test::MEDIUM:
                         $_timeout = $this->timeoutForMediumTests;
+
                         break;
 
                     case \PHPUnit\Util\Test::LARGE:
                         $_timeout = $this->timeoutForLargeTests;
+
                         break;
                 }
 
@@ -696,14 +700,14 @@ class TestResult implements Countable
         } catch (PHP_Invoker_TimeoutException $e) {
             $this->addFailure(
                 $test,
-                new PHPUnit_Framework_RiskyTestError(
+                new RiskyTestError(
                     $e->getMessage()
                 ),
                 $_timeout
             );
 
             $risky = true;
-        } catch (PHPUnit_Framework_MockObject_Exception $e) {
+        } catch (MockObjectException $e) {
             $e = new Warning(
                 $e->getMessage()
             );

@@ -31,8 +31,6 @@ class GenericEventTest extends TestCase
      */
     protected function setUp()
     {
-        parent::setUp();
-
         $this->subject = new \stdClass();
         $this->event = new GenericEvent($this->subject, array('name' => 'Event'));
     }
@@ -44,8 +42,6 @@ class GenericEventTest extends TestCase
     {
         $this->subject = null;
         $this->event = null;
-
-        parent::tearDown();
     }
 
     public function testConstruct()
@@ -114,8 +110,8 @@ class GenericEventTest extends TestCase
 
     public function testOffsetIsset()
     {
-        $this->assertTrue(isset($this->event['name']));
-        $this->assertFalse(isset($this->event['nameNotExist']));
+        $this->assertArrayHasKey('name', $this->event);
+        $this->assertArrayNotHasKey('nameNotExist', $this->event);
     }
 
     public function testHasArgument()

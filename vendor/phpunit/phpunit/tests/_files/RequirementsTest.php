@@ -80,7 +80,16 @@ class RequirementsTest extends TestCase
     }
 
     /**
-     * @requires OS Linux
+     * @requires function testFunc2
+     * @see https://github.com/sebastianbergmann/phpunit/issues/3459
+     */
+    public function testRequiresFunctionWithDigit()
+    {
+    }
+
+    /**
+     * @requires OS SunOS
+     * @requires OSFAMILY Solaris
      */
     public function testEleven()
     {
@@ -91,9 +100,9 @@ class RequirementsTest extends TestCase
      * @requires PHPUnit 9-dev
      * @requires OS DOESNOTEXIST
      * @requires function testFuncOne
-     * @requires function testFuncTwo
+     * @requires function testFunc2
      * @requires extension testExtOne
-     * @requires extension testExtTwo
+     * @requires extension testExt2
      * @requires extension testExtThree 2.0
      */
     public function testAllPossibleRequirements()
@@ -146,6 +155,13 @@ class RequirementsTest extends TestCase
      * @requires OS DOESNOTEXIST
      */
     public function testAlwaysSkip3()
+    {
+    }
+
+    /**
+     * @requires OSFAMILY DOESNOTEXIST
+     */
+    public function testAlwaysSkip4()
     {
     }
 
@@ -395,7 +411,7 @@ class RequirementsTest extends TestCase
 
     /**
      * @requires PHP ~5.6.22 || ~7.0.17
-     * @requires @requires PHPUnit ^5.0.5 || ^6.0.6
+     * @requires PHPUnit ^5.0.5 || ^6.0.6
      */
     public function testVersionConstraintTildeOr()
     {

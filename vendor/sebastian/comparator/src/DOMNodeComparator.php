@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the Comparator package.
+ * This file is part of sebastian/comparator.
  *
  * (c) Sebastian Bergmann <sebastian@phpunit.de>
  *
@@ -49,11 +49,7 @@ class DOMNodeComparator extends ObjectComparator
         $actualAsString   = $this->nodeToText($actual, true, $ignoreCase);
 
         if ($expectedAsString !== $actualAsString) {
-            if ($expected instanceof DOMDocument) {
-                $type = 'documents';
-            } else {
-                $type = 'nodes';
-            }
+            $type = $expected instanceof DOMDocument ? 'documents' : 'nodes';
 
             throw new ComparisonFailure(
                 $expected,
@@ -61,7 +57,7 @@ class DOMNodeComparator extends ObjectComparator
                 $expectedAsString,
                 $actualAsString,
                 false,
-                sprintf("Failed asserting that two DOM %s are equal.\n", $type)
+                \sprintf("Failed asserting that two DOM %s are equal.\n", $type)
             );
         }
     }
@@ -69,41 +65,23 @@ class DOMNodeComparator extends ObjectComparator
     /**
      * Returns the normalized, whitespace-cleaned, and indented textual
      * representation of a DOMNode.
-     *
-     * @param DOMNode $node
-     * @param bool    $canonicalize
-     * @param bool    $ignoreCase
-     *
-     * @return string
      */
-    private function nodeToText(DOMNode $node, $canonicalize, $ignoreCase)
+    private function nodeToText(DOMNode $node, bool $canonicalize, bool $ignoreCase): string
     {
         if ($canonicalize) {
             $document = new DOMDocument;
-            $document->loadXML($node->C14N());
+            @$document->loadXML($node->C14N());
 
             $node = $document;
         }
 
-        if ($node instanceof DOMDocument) {
-            $document = $node;
-        } else {
-            $document = $node->ownerDocument;
-        }
+        $document = $node instanceof DOMDocument ? $node : $node->ownerDocument;
 
         $document->formatOutput = true;
         $document->normalizeDocument();
 
-        if ($node instanceof DOMDocument) {
-            $text = $node->saveXML();
-        } else {
-            $text = $document->saveXML($node);
-        }
+        $text = $node instanceof DOMDocument ? $node->saveXML() : $document->saveXML($node);
 
-        if ($ignoreCase) {
-            $text = strtolower($text);
-        }
-
-        return $text;
+        return $ignoreCase ? $text : \strtolower($text);
     }
 }

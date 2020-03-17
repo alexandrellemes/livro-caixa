@@ -9,8 +9,6 @@ use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
- * ProjectServiceContainer.
- *
  * This class has been auto-generated
  * by the Symfony Dependency Injection Component.
  */
@@ -19,9 +17,6 @@ class ProjectServiceContainer extends Container
     private $parameters;
     private $targetDirs = array();
 
-    /**
-     * Constructor.
-     */
     public function __construct()
     {
         parent::__construct();
@@ -32,12 +27,9 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the 'depends_on_request' service.
+     * Gets the public 'depends_on_request' shared service.
      *
-     * This service is shared.
-     * This method always returns the same instance of the service.
-     *
-     * @return \stdClass A stdClass instance
+     * @return \stdClass
      */
     protected function getDependsOnRequestService()
     {
@@ -49,12 +41,9 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the 'request' service.
+     * Gets the public 'request' shared service.
      *
-     * This service is shared.
-     * This method always returns the same instance of the service.
-     *
-     * @return \Request A Request instance
+     * @return \Request
      */
     protected function getRequestService()
     {

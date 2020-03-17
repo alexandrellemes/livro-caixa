@@ -12,14 +12,14 @@
 namespace Symfony\Component\DependencyInjection\Tests\Loader;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\IniFileLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\Config\Loader\LoaderResolver;
-use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\ExpressionLanguage\Expression;
 
 class YamlFileLoaderTest extends TestCase
@@ -145,7 +145,7 @@ class YamlFileLoaderTest extends TestCase
         $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
         $loader->load('services6.yml');
         $services = $container->getDefinitions();
-        $this->assertTrue(isset($services['foo']), '->load() parses service elements');
+        $this->assertArrayHasKey('foo', $services, '->load() parses service elements');
         $this->assertFalse($services['not_shared']->isShared(), '->load() parses the shared flag');
         $this->assertInstanceOf('Symfony\\Component\\DependencyInjection\\Definition', $services['foo'], '->load() converts service element to Definition instances');
         $this->assertEquals('FooClass', $services['foo']->getClass(), '->load() parses the class attribute');
@@ -161,10 +161,10 @@ class YamlFileLoaderTest extends TestCase
         $this->assertEquals(array('BazClass', 'getInstance'), $services['new_factory3']->getFactory(), '->load() parses the factory tag');
 
         $aliases = $container->getAliases();
-        $this->assertTrue(isset($aliases['alias_for_foo']), '->load() parses aliases');
+        $this->assertArrayHasKey('alias_for_foo', $aliases, '->load() parses aliases');
         $this->assertEquals('foo', (string) $aliases['alias_for_foo'], '->load() parses aliases');
         $this->assertTrue($aliases['alias_for_foo']->isPublic());
-        $this->assertTrue(isset($aliases['another_alias_for_foo']));
+        $this->assertArrayHasKey('another_alias_for_foo', $aliases);
         $this->assertEquals('foo', (string) $aliases['another_alias_for_foo']);
         $this->assertFalse($aliases['another_alias_for_foo']->isPublic());
 
@@ -194,8 +194,8 @@ class YamlFileLoaderTest extends TestCase
         $services = $container->getDefinitions();
         $parameters = $container->getParameterBag()->all();
 
-        $this->assertTrue(isset($services['project.service.bar']), '->load() parses extension elements');
-        $this->assertTrue(isset($parameters['project.parameter.bar']), '->load() parses extension elements');
+        $this->assertArrayHasKey('project.service.bar', $services, '->load() parses extension elements');
+        $this->assertArrayHasKey('project.parameter.bar', $parameters, '->load() parses extension elements');
 
         $this->assertEquals('BAR', $services['project.service.foo']->getClass(), '->load() parses extension elements');
         $this->assertEquals('BAR', $parameters['project.parameter.foo'], '->load() parses extension elements');
@@ -207,6 +207,17 @@ class YamlFileLoaderTest extends TestCase
             $this->assertInstanceOf('\InvalidArgumentException', $e, '->load() throws an InvalidArgumentException if the tag is not valid');
             $this->assertStringStartsWith('There is no extension able to load the configuration for "foobarfoobar" (in', $e->getMessage(), '->load() throws an InvalidArgumentException if the tag is not valid');
         }
+    }
+
+    public function testExtensionWithNullConfig()
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new \ProjectExtension());
+        $loader = new YamlFileLoader($container, new FileLocator(self::$fixturesPath.'/yaml'));
+        $loader->load('null_config.yml');
+        $container->compile();
+
+        $this->assertSame(array(null), $container->getParameter('project.configs'));
     }
 
     public function testSupports()

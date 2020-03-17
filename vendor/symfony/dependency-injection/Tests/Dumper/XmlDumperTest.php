@@ -53,7 +53,7 @@ class XmlDumperTest extends TestCase
         $container = include self::$fixturesPath.'/containers/legacy-container9.php';
         $dumper = new XmlDumper($container);
 
-        $this->assertEquals(str_replace('%path%', self::$fixturesPath.DIRECTORY_SEPARATOR.'includes'.DIRECTORY_SEPARATOR, file_get_contents(self::$fixturesPath.'/xml/legacy-services9.xml')), $dumper->dump(), '->dump() dumps services');
+        $this->assertEquals(str_replace('%path%', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR, file_get_contents(self::$fixturesPath.'/xml/legacy-services9.xml')), $dumper->dump(), '->dump() dumps services');
 
         $dumper = new XmlDumper($container = new ContainerBuilder());
         $container->register('foo', 'FooClass')->addArgument(new \stdClass());
@@ -71,7 +71,7 @@ class XmlDumperTest extends TestCase
         $container = include self::$fixturesPath.'/containers/container9.php';
         $dumper = new XmlDumper($container);
 
-        $this->assertEquals(str_replace('%path%', self::$fixturesPath.DIRECTORY_SEPARATOR.'includes'.DIRECTORY_SEPARATOR, file_get_contents(self::$fixturesPath.'/xml/services9.xml')), $dumper->dump(), '->dump() dumps services');
+        $this->assertEquals(str_replace('%path%', self::$fixturesPath.\DIRECTORY_SEPARATOR.'includes'.\DIRECTORY_SEPARATOR, file_get_contents(self::$fixturesPath.'/xml/services9.xml')), $dumper->dump(), '->dump() dumps services');
 
         $dumper = new XmlDumper($container = new ContainerBuilder());
         $container->register('foo', 'FooClass')->addArgument(new \stdClass());
@@ -191,5 +191,13 @@ class XmlDumperTest extends TestCase
         $dumper = new XmlDumper($container);
 
         $this->assertEquals(file_get_contents(self::$fixturesPath.'/xml/services24.xml'), $dumper->dump());
+    }
+
+    public function testDumpAbstractServices()
+    {
+        $container = include self::$fixturesPath.'/containers/container_abstract.php';
+        $dumper = new XmlDumper($container);
+
+        $this->assertEquals(file_get_contents(self::$fixturesPath.'/xml/services_abstract.xml'), $dumper->dump());
     }
 }

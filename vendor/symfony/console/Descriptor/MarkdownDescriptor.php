@@ -50,7 +50,7 @@ class MarkdownDescriptor extends Descriptor
         $this->write(
             '**'.$option->getName().':**'."\n\n"
             .'* Name: `--'.$option->getName().'`'."\n"
-            .'* Shortcut: '.($option->getShortcut() ? '`-'.implode('|-', explode('|', $option->getShortcut())).'`' : '<none>')."\n"
+            .'* Shortcut: '.($option->getShortcut() ? '`-'.str_replace('|', '|-', $option->getShortcut()).'`' : '<none>')."\n"
             .'* Accept value: '.($option->acceptValue() ? 'yes' : 'no')."\n"
             .'* Is value required: '.($option->isValueRequired() ? 'yes' : 'no')."\n"
             .'* Is multiple: '.($option->isArray() ? 'yes' : 'no')."\n"
@@ -64,7 +64,7 @@ class MarkdownDescriptor extends Descriptor
      */
     protected function describeInputDefinition(InputDefinition $definition, array $options = array())
     {
-        if ($showArguments = count($definition->getArguments()) > 0) {
+        if ($showArguments = \count($definition->getArguments()) > 0) {
             $this->write('### Arguments:');
             foreach ($definition->getArguments() as $argument) {
                 $this->write("\n\n");
@@ -72,7 +72,7 @@ class MarkdownDescriptor extends Descriptor
             }
         }
 
-        if (count($definition->getOptions()) > 0) {
+        if (\count($definition->getOptions()) > 0) {
             if ($showArguments) {
                 $this->write("\n\n");
             }

@@ -11,8 +11,8 @@ namespace PHPUnit\Runner;
 
 use File_Iterator_Facade;
 use PHPUnit\Framework\Exception;
-use PHPUnit\Framework\TestSuite;
 use PHPUnit\Framework\Test;
+use PHPUnit\Framework\TestSuite;
 use ReflectionClass;
 use ReflectionException;
 
@@ -49,7 +49,7 @@ abstract class BaseTestRunner
      * @param string $suiteClassFile
      * @param mixed  $suffixes
      *
-     * @return Test
+     * @return Test|null
      */
     public function getTest($suiteClassName, $suiteClassFile = '', $suffixes = '')
     {

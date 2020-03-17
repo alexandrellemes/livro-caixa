@@ -11,8 +11,8 @@
 
 namespace Symfony\Component\Translation\Writer;
 
-use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Dumper\DumperInterface;
+use Symfony\Component\Translation\MessageCatalogue;
 
 /**
  * TranslationWriter writes translation messages.
@@ -21,11 +21,6 @@ use Symfony\Component\Translation\Dumper\DumperInterface;
  */
 class TranslationWriter
 {
-    /**
-     * Dumpers used for export.
-     *
-     * @var array
-     */
     private $dumpers = array();
 
     /**

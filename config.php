@@ -1,8 +1,8 @@
 <?php
 
 //Configuração do Banco de dados
-$host = "localhost";
-$user = "livrocaixa";
+$host = "mysqldb";
+$user = "root";
 $pass = "123456";
 $d_b = "livro_caixa";
 

@@ -13,8 +13,8 @@ namespace Symfony\Component\Console\Tests\Input;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputOption;
 
 class ArrayInputTest extends TestCase
@@ -140,5 +140,11 @@ class ArrayInputTest extends TestCase
     {
         $input = new ArrayInput(array('-f' => null, '-b' => 'bar', '--foo' => 'b a z', '--lala' => null, 'test' => 'Foo', 'test2' => "A\nB'C"));
         $this->assertEquals('-f -b=bar --foo='.escapeshellarg('b a z').' --lala Foo '.escapeshellarg("A\nB'C"), (string) $input);
+
+        $input = new ArrayInput(array('-b' => array('bval_1', 'bval_2'), '--f' => array('fval_1', 'fval_2')));
+        $this->assertSame('-b=bval_1 -b=bval_2 --f=fval_1 --f=fval_2', (string) $input);
+
+        $input = new ArrayInput(array('array_arg' => array('val_1', 'val_2')));
+        $this->assertSame('val_1 val_2', (string) $input);
     }
 }

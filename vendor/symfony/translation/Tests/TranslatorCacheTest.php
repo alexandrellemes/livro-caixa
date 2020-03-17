@@ -15,8 +15,8 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Resource\SelfCheckingResourceInterface;
 use Symfony\Component\Translation\Loader\ArrayLoader;
 use Symfony\Component\Translation\Loader\LoaderInterface;
-use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\MessageCatalogue;
+use Symfony\Component\Translation\Translator;
 
 class TranslatorCacheTest extends TestCase
 {
@@ -147,6 +147,17 @@ class TranslatorCacheTest extends TestCase
         $translator->addLoader($format, $this->createFailingLoader());
         $translator->addResource($format, array($msgid => 'OK'), $locale);
         $this->assertEquals('OK', $translator->trans($msgid), '-> the cache was overwritten by another translator instance in '.($debug ? 'debug' : 'production'));
+    }
+
+    public function testGeneratedCacheFilesAreOnlyBelongRequestedLocales()
+    {
+        $translator = new Translator('a', null, $this->tmpDir);
+        $translator->setFallbackLocales(array('b'));
+        $translator->trans('bar');
+
+        $cachedFiles = glob($this->tmpDir.'/*.php');
+
+        $this->assertCount(1, $cachedFiles);
     }
 
     public function testDifferentCacheFilesAreUsedForDifferentSetsOfFallbackLocales()

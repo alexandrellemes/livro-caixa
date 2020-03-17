@@ -13,10 +13,10 @@ namespace PHPUnit\Util\PHP;
 use __PHP_Incomplete_Class;
 use ErrorException;
 use PHPUnit\Framework\Exception;
-use PHPUnit\Framework\TestResult;
-use PHPUnit\Framework\TestFailure;
-use PHPUnit\Framework\Test;
 use PHPUnit\Framework\SyntheticError;
+use PHPUnit\Framework\Test;
+use PHPUnit\Framework\TestFailure;
+use PHPUnit\Framework\TestResult;
 use PHPUnit\Util\InvalidArgumentHelper;
 use SebastianBergmann\Environment\Runtime;
 
@@ -46,7 +46,7 @@ abstract class AbstractPhpProcess
     protected $args = '';
 
     /**
-     * @var array
+     * @var array<string, string>
      */
     protected $env = [];
 
@@ -134,7 +134,7 @@ abstract class AbstractPhpProcess
     /**
      * Sets the array of environment variables to start the child process with
      *
-     * @param array $env
+     * @param array<string, string> $env
      */
     public function setEnv(array $env)
     {
@@ -144,7 +144,7 @@ abstract class AbstractPhpProcess
     /**
      * Returns the array of environment variables to start the child process with
      *
-     * @return array
+     * @return array<string, string>
      */
     public function getEnv()
     {
@@ -264,7 +264,7 @@ abstract class AbstractPhpProcess
         $buffer = '';
 
         foreach ($settings as $setting) {
-            $buffer .= ' -d ' . $setting;
+            $buffer .= ' -d ' . \escapeshellarg($setting);
         }
 
         return $buffer;
@@ -292,6 +292,7 @@ abstract class AbstractPhpProcess
             \set_error_handler(function ($errno, $errstr, $errfile, $errline) {
                 throw new ErrorException($errstr, $errno, $errno, $errfile, $errline);
             });
+
             try {
                 if (\strpos($stdout, "#!/usr/bin/env php\n") === 0) {
                     $stdout = \substr($stdout, 19);
@@ -318,8 +319,8 @@ abstract class AbstractPhpProcess
                 $test->setResult($childResult['testResult']);
                 $test->addToAssertionCount($childResult['numAssertions']);
 
+                /** @var TestResult $childResult */
                 $childResult = $childResult['result'];
-                /* @var $childResult TestResult */
 
                 if ($result->getCollectCodeCoverageInformation()) {
                     $result->getCodeCoverage()->merge(
@@ -383,7 +384,7 @@ abstract class AbstractPhpProcess
     }
 
     /**
-     * Gets the thrown exception from a PHPUnit_Framework_TestFailure.
+     * Gets the thrown exception from a PHPUnit\Framework\TestFailure.
      *
      * @param TestFailure $error
      *
