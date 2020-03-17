@@ -1,9 +1,9 @@
 <?php
 
 //Configuração do Banco de dados
-$host = "mysqldb";
-$user = "root";
-$pass = "123456";
+$host = "localhost";
+$user = "";
+$pass = "";
 $d_b = "livro_caixa";
 
 //Título do seu livro Caixa, geralmente seu nome
