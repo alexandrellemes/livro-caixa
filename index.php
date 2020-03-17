@@ -486,7 +486,13 @@ $resultado_geral=$entradas-$saidas;
 <input type="hidden" name="mes" value="<?php echo $mes_hoje?>" >
 <input type="hidden" name="ano" value="<?php echo $ano_hoje?>" >
     Filtrar por categoria:  <select name="filtro_cat" onchange="form_filtro_cat.submit()">
-<option value="">Tudo</option>
+    <?php
+    $qr=mysqli_query($conn, "SELECT * FROM categorias");
+    while ($row=mysqli_fetch_array($qr)){
+    ?>
+
+        <option value="<?php echo $row['id']?>"><?php echo $row['nome']?></option>
+    <?php }?>
 <?php
 $qr=mysqli_query($conn, "SELECT DISTINCT c.id, c.nome FROM categorias c, movimentos m WHERE m.cat=c.id && m.mes='$mes_hoje' && m.ano='$ano_hoje'");
 while ($row=mysqli_fetch_array($qr)){
@@ -503,25 +509,30 @@ while ($row=mysqli_fetch_array($qr)){
 </td>
 </tr>
 <?php
+$pas = 0;
 $filtros="";
 if (isset($_GET['filtro_cat'])){
 	if ($_GET['filtro_cat']!=''){
 		$filtros="&& cat='".$_GET['filtro_cat']."'";
+        $filtros2 =$_GET['filtro_cat'];
 
-                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 && mes='$mes_hoje' && ano='$ano_hoje' $filtros");
+                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 && mes='$mes_hoje' && ano='$ano_hoje' && categoria_id = '$filtros2'");
                 $row=mysqli_fetch_array($qr);
                 $entradas=$row['total'];
 
-                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 && mes='$mes_hoje' && ano='$ano_hoje' $filtros");
+                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 && mes='$mes_hoje' && ano='$ano_hoje' && categoria_id ='$filtros2'");
                 $row=mysqli_fetch_array($qr);
                 $saidas=$row['total'];
 
                 $resultado_mes=$entradas-$saidas;
+        $qr=mysqli_query($conn, "SELECT * FROM movimentos WHERE mes='$mes_hoje' && ano='$ano_hoje' && categoria_id ='$filtros2' ORDER By dia");
+        $pas = 1;
 
         }
 }
-
-$qr=mysqli_query($conn, "SELECT * FROM movimentos WHERE mes='$mes_hoje' && ano='$ano_hoje' $filtros ORDER By dia");
+if($pas == 0) {
+    $qr = mysqli_query($conn, "SELECT * FROM movimentos WHERE mes='$mes_hoje' && ano='$ano_hoje' $filtros ORDER By dia");
+}
 $cont=0;
 while ($row=mysqli_fetch_array($qr)) {
 $cont++;
