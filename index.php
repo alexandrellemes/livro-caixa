@@ -495,7 +495,7 @@ $resultado_geral=$entradas-$saidas;
     <?php }?>
 <?php
 $qr=mysqli_query($conn, "SELECT DISTINCT c.id, c.nome FROM categorias c, movimentos m WHERE m.cat=c.id && m.mes='$mes_hoje' && m.ano='$ano_hoje'");
-while ($row=mysqli_fetch_array($qr)){
+while ($qr && $row=mysqli_fetch_array($qr, MYSQLI_NUM)){
 ?>
 <option <?php if (isset($_GET['filtro_cat']) && $_GET['filtro_cat']==$row['id'])echo "selected=selected"?> value="<?php echo $row['id']?>"><?php echo $row['nome']?></option>
 <?php }?>
