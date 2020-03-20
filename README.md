@@ -16,7 +16,16 @@ Algumas melhorias:
 * Visão dos lançamentos através do FullCalendar.
 * Retirada do elemento "table" em algumas entradas de dados.
 * Retirada de cores em excesso.
+* Inclusão do PDV
+* Envio de e-mail para recuperar senha.
 
+## PDV
+
+Uso: seu.domino/pdv.php
+
+## Recover
+
+Uso: seu.dominio/recover.php
 
 
 ﻿Seguem instruções de instalação e configuração
