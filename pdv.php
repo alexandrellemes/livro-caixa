@@ -1,88 +1,176 @@
-  <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-<?php
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <title id='titulo'>Livro caixa  / PDV</title>
+        <meta name="LANGUAGE" content="Portuguese" />
+        <meta name="AUDIENCE" content="all" />
+        <meta name="RATING" content="GENERAL" />
 
-ini_set('display_errors', true);
-error_reporting(E_ALL);
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="css/bootstrap.min.css">
 
-/** Configuracao para o phpSecurePages **/
-$cfgProgDir =  'phpSecurePages/';
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="css/bootstrap-theme.min.css">
 
+        <link href="css/normalize.css" rel="stylesheet" type="text/css" />
 
+    </head>
+    <body>
 
+        <?php
 
-//session_start();
-set_time_limit(0);
+        ini_set('display_errors', true);
+        error_reporting(E_ALL);
 
-include 'config.php';
-include 'functions.php';
-if(isset( $_GET['resultado'])){
-    $valor = $_GET['corrida'];
-    $tipo = $_GET['tipo'];
-    $cat = $_GET['categoria'];
-    $mes = date('m');
-    $ano =date('Y');
-    $dia =date('d');
+        /** Configuracao para o phpSecurePages **/
+        $cfgProgDir =  'phpSecurePages/';
 
-    $sql = "INSERT INTO movimentos (dia,mes,ano,tipo,valor,categoria_id)
-            values ('$dia','$mes','$ano','$tipo','$valor','$cat')";
+        //session_start();
+        set_time_limit(0);
 
-    mysqli_query($conn, $sql);
+        include 'config.php';
+        include 'functions.php';
+        if(isset( $_GET['resultado'])){
+            $valor = $_GET['corrida'];
+            $tipo = $_GET['tipo'];
+            $cat = $_GET['categoria'];
 
-    echo mysqli_error($conn);
+            $mes = date('m');
+            $ano =date('Y');
+            $dia =date('d');
 
+            $sql = "INSERT INTO movimentos (dia,mes,ano,tipo,valor,categoria_id)
+                    values ('$dia','$mes','$ano','$tipo','$valor','$cat')";
 
-}
-?>
-  <script type="text/javascript">
-      function calculadora() {
-          var n1 = parseFloat(document.getElementById('n1').value);
-          var n2 = parseFloat(document.getElementById('n2').value);
-          var resultado = 0;
-              resultado = n2 - n1;
+            mysqli_query($conn, $sql);
 
-          document.getElementById('resultado').value = resultado;
-      }
-  </script>
+            echo mysqli_error($conn);
 
 
-  <form action="" method="GET" >
-  <div class="container">
-      <div class="form-group">
-      <label for="usr">
-          Valor da corrida:</label>
-          <input id="n1" type="number"  class="currency" step="0.01" name="corrida" required><br>
-      </div>
-          <div class="form-group">
-          <label for="pwd"> Pago: </label>
+        }
+        ?>
 
-          <input id="n2" type="number" oninput="calculadora()" step="0.01">
+        <form action="" method="GET" >
+          <div class="container">
+
+              <div class="form-group row">
+                  <label class="control-label col-md-2" for="usr">Valor da corrida:</label>
+                  <div class="col-md-10">
+                      <input class="currency" step="0.01" type="text" name="corrida" id="corrida" size="10" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," required />
+                      <span class="glyphicon glyphicon-remove" onclick="limparCorrida();"></span>
+                  </div>
+              </div>
+
+              <div class="form-group row">
+                  <label class="control-label col-md-2" for="pwd">Pago: </label>
+                  <div class="col-md-10">
+                      <input class="currency" step="0.01" type="text" name="pago" id="pago" oninput="calculadora()" size="10" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," required />
+                      <span class="glyphicon glyphicon-remove" onclick="limparPago();"></span>
+                  </div>
+              </div>
+
+              <div class="form-group row">
+                  <label class="control-label col-md-2" for="tipo">Tipo da despesa:</label>
+                  <div class="col-md-10">
+                      <select class="form-control" name="tipo" id="tipo" required>
+                          <option value="1">Receita</option>
+                          <option value="2">Cartão</option>
+                          <option value="0">Despesa</option>
+                      </select>
+                  </div>
+              </div>
+
+              <div class="form-group row">
+                  <label class="control-label col-md-2" for="categoria">Categoria:</label>
+                  <div class="col-md-10">
+                      <select class="form-control" name="categoria" id="categoria" required>
+                          <?php
+                          $qr=mysqli_query($conn, "SELECT * FROM categorias");
+                          while ($row=mysqli_fetch_array($qr)) {
+                          ?>
+                              <option value="<?php echo $row['id']?>"><?php echo $row['nome']?></option>
+                          <?php } ?>
+                      </select>
+                  </div>
+              </div>
+
+              <div class="form-group row">
+                  <label class="control-label col-md-2" for="usr">Troco:</label>
+                  <div class="col-md-10">
+                      <input type="text" name="resultado" id="resultado" size="15" maxlength="15" data-symbol="R$ " data-thousands="." data-decimal="," />
+                      <span class="glyphicon glyphicon-hand-left" onclick="calculadora();"></span>
+                  </div>
+              </div>
+
           </div>
-      <div class="form-group">
-          <label for="exampleFormControlSelect1">tipo da despesa</label>
-          <select name="tipo" class="form-control" id="exampleFormControlSelect1" required>
-              <option value="1">Receita</option>
-              <option value="0">Despesa</option>
-              <option value="2">Cartão</option>
-          </select>
-      </div>
-      <div class="form-group">
-          <label for="exampleFormControlSelect1"> Categoria: <select name="categoria" required>
-          <?php
-          $qr=mysqli_query($conn, "SELECT * FROM categorias");
-          while ($row=mysqli_fetch_array($qr)){
-              ?>
-              <option value="<?php echo $row['id']?>"><?php echo $row['nome']?></option>
-          <?php }?>
-      </select>
-      </div>
-      <div class="form-group">
-          <label for="usr">Troco: <input id="resultado" type="number" name="resultado" step="0.01"></label>
-      </div>
-  </div>
-      <button type="submit" class="btn btn-primary center-block"">enviar</button>
-  </form>
+          <hr>
+          <button type="submit" class="btn btn-primary center-block"">enviar</button>
 
+        </form>
+
+        <!--  JavaScripts  -->
+        <script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script type="text/javascript" src="js/bootstrap.min.js"></script>
+
+        <script type="text/javascript" src="js/jquery.maskMoney.js" ></script>
+
+        <script type="text/javascript" src="scripts.js"></script>
+
+        <script type="text/javascript">
+
+            function limparCorrida() {
+                $('#corrida').val('');
+                $('#corrida').focus();
+            }
+
+            function limparPago() {
+                $('#pago').val('');
+                $('#pago').focus();
+            }
+
+            function calculadora() {
+                var corrida = parseFloat($('#corrida').val().replace(".", "").replace(',','.'));
+                var pago = parseFloat($('#pago').val().replace(".", "").replace(',','.'));
+
+                var resultado = isNaN(pago - corrida) ? 0 : (pago - corrida);
+
+                var texto = resultado.toLocaleString("pt-BR", { style: "currency" , currency:"BRL"});
+
+                // console.log(corrida);
+                // console.log(pago);
+                // console.log(texto);
+
+                $('#resultado').val(texto);
+
+                $("#resultado").css('color', 'blue');
+                if (resultado > 0) {
+                    $("#resultado").css('color', 'green');
+                } else if(resultado < 0) {
+                    $("#resultado").css('color', 'red');
+                }
+
+            }
+
+            $(function() {
+                $('#corrida').maskMoney();
+                $('#pago').maskMoney();
+                calculadora();
+            });
+
+            $("#corrida").bind("change paste keyup", function() {
+                calculadora();
+            });
+
+            $("#pago").bind("change paste keyup", function() {
+                calculadora();
+            });
+
+        </script>
+
+    </body>
+</html>
