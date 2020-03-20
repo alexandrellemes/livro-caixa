@@ -1,7 +1,7 @@
 <?php
 
 function formata_dinheiro($valor) {
-    $valor = number_format($valor, 2, ',', '');
+    $valor = number_format($valor, 2, ',', '.');
     return "R$ " . $valor;
 }
 
