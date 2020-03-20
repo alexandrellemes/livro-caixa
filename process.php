@@ -95,11 +95,11 @@ $bodyMessage =<<<AKAM
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>Livro Caixa - recover password</title>
+<title>Livro Caixa - Recuperação de senha</title>
 </head>
 <body>
 <div style="width: 640px; font-family: Arial, Helvetica, sans-serif; font-size: 11px;">
-<h1>Recover Password - Livro Caixa</h1>
+<h1>Recuperação de senha - Livro Caixa</h1>
 <hr>
 <h1>O e-mail informado é: <strong>$userEmail</strong></h1>
 <h1>Sua senha é: <strong>$userPassword</strong></h1>
@@ -112,7 +112,7 @@ AKAM;
 $mail->msgHTML($bodyMessage);
 
 //Replace the plain text body with one created manually
-$mail->AltBody = 'This is a plain-text message body';
+$mail->AltBody = 'Teste de mensagem - texto plano';
 
 //Attach an image file
 $mail->addAttachment('PHPMailer/examples/images/phpmailer_mini.png');
