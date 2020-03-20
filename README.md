@@ -28,7 +28,14 @@ O arquivo com a modelagm está na pasta Instalar
 
 Rode o COMPOSER, a partir da raiz da aplicação, para instalar as dependências:
 
+# $ ./composer.phar install
+
+ou
+
 # $ composer install
+
+Caso tenha o COMPOSER instalado.
+
 
 Após importar o banco para o MySQl.
 
