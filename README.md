@@ -14,7 +14,7 @@ Algumas melhorias:
 * O arquivo de modelagem e banco estão na pasta <Instalar>.
 * Utilização da biblioteca PHPMailer para a recuperação de senha
 * Visão dos lançamentos através do FullCalendar.
-* Retirada do elemento <table> em algumas entradas de dados.
+* Retirada do elemento "table" em algumas entradas de dados.
 * Retirada de cores em excesso.
 
 
