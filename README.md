@@ -70,6 +70,7 @@ Senha: 123456
 ### Requerimento
 * PHP >= 5.6.0
 * MySQL
+* Atualmente rodando no PHP 7.4.
 
 ### Créditos
 * Felipe Barth fibbarth@gmail.com
