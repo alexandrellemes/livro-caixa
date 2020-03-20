@@ -64,7 +64,6 @@ $d_b = "livro_caixa";
 
 $lc_titulo="Título de sua aplicação";
 
-
 ---------------------------------------
 
 Dados de acesso
@@ -74,6 +73,14 @@ Email: admin@admin.com
 Senha: 123456
 
 ---------------------------------------
+
+### Configuração phpSecurePages
+
+Edite o arquivo "config.php", dentro da pasta phpSecurePages e configure o acesso ao banco de dados.
+
+### Configuração PHPMailer
+
+Edite o arquivo "process.php" e atualize as informações de e-mail, conta, porta e protocolo de segurança.
 
 
 ### Frameworks/Bibliotecas
