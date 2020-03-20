@@ -13,6 +13,10 @@ Algumas melhorias:
 * Modelagem do banco
 * O arquivo de modelagem e banco estão na pasta <Instalar>.
 * Utilização da biblioteca PHPMailer para a recuperação de senha
+* Visão dos lançamentos através do FullCalendar.
+* Retirada do elemento <table> em algumas entradas de dados.
+* Retirada de cores em excesso.
+
 
 
 ﻿Seguem instruções de instalação e configuração
@@ -60,12 +64,15 @@ Senha: 123456
 * [twbs/bootstrap](https://github.com/twbs/bootstrap) 
 * [jquery/jquery](https://github.com/jquery/jquery) 
 * [jquery/jquery-ui](https://github.com/jquery/jquery-ui) 
+* [phpSecurePages](http://www.phpsecurepages.com/) 
+* [FullCalendar](http://fullcalendar.io) 
 
 ### Requerimento
 * PHP >= 5.6.0
 * MySQL
 
 ### Créditos
+* Felipe Barth fibbarth@gmail.com
 * Augusto Cezar Perez augustoperez696@live.com
-* Alexandre LLemes - alexandre.llemes@gmail.com (postei no meu(Augusto) git porque esse cara não deixa fazer up de correção no sistema falho dele.)
+* Alexandre LLemes - alexandre.llemes@gmail.com
 
