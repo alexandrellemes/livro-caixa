@@ -37,8 +37,8 @@ include 'functions.php';
                     <div class="panel-body">
                         <div class="text-center">
                           <h3><i class="fa fa-lock fa-4x"></i></h3>
-                          <h2 class="text-center">Forgot Password?</h2>
-                          <p>You can reset your password here.</p>
+                          <h2 class="text-center">Esqueceu a senha?</h2>
+                          <p>Voce pode mudar a senha aqui.</p>
                             <div class="panel-body">
                               
                               <form class="form" id="recover-form" autocomplete="off" role="form" method="post" action="process.php">
@@ -47,11 +47,11 @@ include 'functions.php';
                                     <div class="input-group">
                                       <span class="input-group-addon"><i class="glyphicon glyphicon-envelope color-blue"></i></span>
                                       
-                                      <input id="emailInput" name="emailInput" placeholder="email address" class="form-control" oninvalid="setCustomValidity('Please enter a valid email address!')" onchange="try{setCustomValidity('')}catch(e){}" required="" type="email" autofocus >
+                                      <input id="emailInput" name="emailInput" placeholder="Endereço de e-mail" class="form-control" oninvalid="setCustomValidity('Entre um e-mail válido!')" onchange="try{setCustomValidity('')}catch(e){}" required="" type="email" autofocus >
                                     </div>
                                   </div>
                                   <div class="form-group">
-                                    <input class="btn btn-lg btn-primary btn-block" value="Send My Password" type="button" onClick="recoverPassword();" >
+                                    <input class="btn btn-lg btn-primary btn-block" value="Enviar" type="button" onClick="recoverPassword();" >
                                   </div>
                                 </fieldset>
                               </form>
