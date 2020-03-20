@@ -33,21 +33,34 @@
 
         include 'config.php';
         include 'functions.php';
-        if(isset( $_GET['resultado'])){
+
+        if(isset( $_GET['resultado'])) {
+
             $valor = $_GET['corrida'];
+            $valor = str_replace('.', '', $valor);
+            $valor = str_replace(',', '.', $valor);
+
             $tipo = $_GET['tipo'];
             $cat = $_GET['categoria'];
 
             $mes = date('m');
-            $ano =date('Y');
-            $dia =date('d');
+            $ano = date('Y');
+            $dia = date('d');
 
-            $sql = "INSERT INTO movimentos (dia,mes,ano,tipo,valor,categoria_id)
-                    values ('$dia','$mes','$ano','$tipo','$valor','$cat')";
+            $sql = "INSERT INTO movimentos (dia,mes,ano,tipo,valor,categoria_id, descricao)
+                    values ('$dia','$mes','$ano','$tipo','$valor','$cat', 'Lancamento via PDV')";
 
-            mysqli_query($conn, $sql);
+            try {
 
-            echo mysqli_error($conn);
+                mysqli_query($conn, $sql);
+
+                header("Refresh:0; url=pdv.php");
+
+            } catch (Exception $e) {
+
+                die($e->getMessage());
+            }
+
 
 
         }
@@ -160,6 +173,7 @@
                 $('#corrida').maskMoney();
                 $('#pago').maskMoney();
                 calculadora();
+                $('#corrida').focus();
             });
 
             $("#corrida").bind("change paste keyup", function() {
