@@ -12,7 +12,7 @@ include 'functions.php';
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
-    <title id='titulo'>Livro caixa <?php echo $lc_titulo ?></title>
+    <title id='titulo'>Livro caixa <?php echo APP_NAME; ?></title>
     <meta name="LANGUAGE" content="Portuguese"/>
     <meta name="AUDIENCE" content="all"/>
     <meta name="RATING" content="GENERAL"/>
