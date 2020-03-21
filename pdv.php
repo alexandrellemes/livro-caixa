@@ -66,63 +66,67 @@
         }
         ?>
 
-        <form action="" method="GET" >
-          <div class="container">
+        <div class="container">
+            <form id="frmPDV" action="" method="GET" >
+                <fieldset>
+                    <legend>PDV - <?php echo $lc_titulo?></legend>
+                    <div class="form-group row">
+                        <label class="control-label col-md-2" for="usr">Valor da corrida:</label>
+                        <div class="col-md-10">
+                            <input class="currency" step="0.01" type="text" name="corrida" id="corrida" size="10" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," required />
+                            <span class="glyphicon glyphicon-remove" onclick="limparCorrida();"></span>
+                        </div>
+                    </div>
 
-              <div class="form-group row">
-                  <label class="control-label col-md-2" for="usr">Valor da corrida:</label>
-                  <div class="col-md-10">
-                      <input class="currency" step="0.01" type="text" name="corrida" id="corrida" size="10" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," required />
-                      <span class="glyphicon glyphicon-remove" onclick="limparCorrida();"></span>
-                  </div>
-              </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-2" for="pwd">Pago: </label>
+                        <div class="col-md-10">
+                            <input class="currency" step="0.01" type="text" name="pago" id="pago" oninput="calculadora()" size="10" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," required />
+                            <span class="glyphicon glyphicon-remove" onclick="limparPago();"></span>
+                        </div>
+                    </div>
 
-              <div class="form-group row">
-                  <label class="control-label col-md-2" for="pwd">Pago: </label>
-                  <div class="col-md-10">
-                      <input class="currency" step="0.01" type="text" name="pago" id="pago" oninput="calculadora()" size="10" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," required />
-                      <span class="glyphicon glyphicon-remove" onclick="limparPago();"></span>
-                  </div>
-              </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-2" for="tipo">Tipo da despesa:</label>
+                        <div class="col-md-10">
+                            <select class="form-control" name="tipo" id="tipo" required>
+                                <option value="1">Receita</option>
+                                <option value="2">Cartão</option>
+                                <option value="0">Despesa</option>
+                            </select>
+                        </div>
+                    </div>
 
-              <div class="form-group row">
-                  <label class="control-label col-md-2" for="tipo">Tipo da despesa:</label>
-                  <div class="col-md-10">
-                      <select class="form-control" name="tipo" id="tipo" required>
-                          <option value="1">Receita</option>
-                          <option value="2">Cartão</option>
-                          <option value="0">Despesa</option>
-                      </select>
-                  </div>
-              </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-2" for="categoria">Categoria:</label>
+                        <div class="col-md-10">
+                            <select class="form-control" name="categoria" id="categoria" required>
+                                <?php
+                                $qr=mysqli_query($conn, "SELECT * FROM categorias");
+                                while ($row=mysqli_fetch_array($qr)) {
+                                    ?>
+                                    <option value="<?php echo $row['id']?>"><?php echo $row['nome']?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
 
-              <div class="form-group row">
-                  <label class="control-label col-md-2" for="categoria">Categoria:</label>
-                  <div class="col-md-10">
-                      <select class="form-control" name="categoria" id="categoria" required>
-                          <?php
-                          $qr=mysqli_query($conn, "SELECT * FROM categorias");
-                          while ($row=mysqli_fetch_array($qr)) {
-                          ?>
-                              <option value="<?php echo $row['id']?>"><?php echo $row['nome']?></option>
-                          <?php } ?>
-                      </select>
-                  </div>
-              </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-2" for="usr">Troco:</label>
+                        <div class="col-md-10">
+                            <input type="text" name="resultado" id="resultado" size="15" maxlength="15" data-symbol="R$ " data-thousands="." data-decimal="," />
+                            <span class="glyphicon glyphicon-hand-left" onclick="calculadora();"></span>
+                        </div>
+                    </div>
 
-              <div class="form-group row">
-                  <label class="control-label col-md-2" for="usr">Troco:</label>
-                  <div class="col-md-10">
-                      <input type="text" name="resultado" id="resultado" size="15" maxlength="15" data-symbol="R$ " data-thousands="." data-decimal="," />
-                      <span class="glyphicon glyphicon-hand-left" onclick="calculadora();"></span>
-                  </div>
-              </div>
+                    <hr>
+                    <button type="button" class="btn btn-primary center-block" id="btnEnviar" name="btnEnviar" >enviar</button>
 
-          </div>
-          <hr>
-          <button type="submit" class="btn btn-primary center-block"">enviar</button>
+                </fieldset>
 
-        </form>
+            </form>
+
+        </div>
 
         <!--  JavaScripts  -->
         <script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>
@@ -182,6 +186,23 @@
 
             $("#pago").bind("change paste keyup", function() {
                 calculadora();
+            });
+
+            $( "#btnEnviar" ).click(function() {
+
+                var corrida = parseFloat($('#corrida').val().replace(".", "").replace(',','.'));
+                var pago = parseFloat($('#pago').val().replace(".", "").replace(',','.'));
+
+                if (isNaN(corrida)) {
+                    alert('Digite o valor de corrida!');
+                    $('#corrida').focus();
+                } else if (isNaN(pago)) {
+                    alert('Digite o valor de pago!');
+                    $('#pago').focus();
+                } else {
+                     $('#frmPDV').submit();
+                }
+
             });
 
         </script>
