@@ -79,7 +79,7 @@ $mail->isSMTP();
 // 1 = client messages
 // 2 = client and server messages
 $mail->SMTPDebug = 0;
-if (APP_DEBUG == 'true') {
+if (APP_DEBUG) {
     $mail->SMTPDebug = 2;
 }
 
