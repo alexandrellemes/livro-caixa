@@ -137,7 +137,7 @@ else
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <title id='titulo'>Livro caixa <?php echo $lc_titulo?></title>
+    <title id='titulo'>Livro caixa <?php echo APP_NAME; ?></title>
     <meta name="LANGUAGE" content="Portuguese" />
     <meta name="AUDIENCE" content="all" />
     <meta name="RATING" content="GENERAL" />
@@ -160,7 +160,7 @@ else
 
     <div class="form-group row">
         <label class="control-label col-md-4">
-            <h2 style="margin:5px">Livro Caixa - <?php echo $lc_titulo?></h2>
+            <h2 style="margin:5px">Livro Caixa - <?php echo APP_NAME; ?></h2>
         </label>
 
         <label class="control-label col-md-8 text-right">
@@ -650,7 +650,7 @@ else
     <br />
     <div class="form-group row">
         <div class="col-md-12 text-right">
-            <span>Livro Caixa - <strong><?php echo $lc_titulo ?></strong></span>
+            <span>Livro Caixa - <strong><?php echo APP_NAME; ?></strong></span>
             <button class="btn btn-default btn-lg" type="button" onclick="window.location.href = 'index.php?sair' ">
                 <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
                 Saída
