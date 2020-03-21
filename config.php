@@ -1,23 +1,5 @@
 <?php
 
-
-function convertDotEnvArray($fileDotEnv) {
-
-    // Monta o array com o separador PHP_EOL.
-    $arrayDotEnv = explode(PHP_EOL, $fileDotEnv);
-
-    $arrayRetorno = array();
-    foreach ($arrayDotEnv as $item => $value) {
-        $elemento = explode('=', $value);
-
-        if ($value != '') {
-            $arrayRetorno[$elemento[0]] = $elemento[1];
-        }
-    }
-
-    return $arrayRetorno;
-}
-
 /**
  * Leitura do arquivo .env
  */

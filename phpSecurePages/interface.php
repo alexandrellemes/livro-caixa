@@ -68,7 +68,8 @@
                         			<i class="fa fa-lock"></i>
                         		</div>
                             </div>
-                            <div class="form-bottom">
+
+                            <div class="form-box">
 			                    <form role="form" action="" method="post" class="login-form">
 			                    	<div class="form-group">
 			                    		<label class="sr-only" for="login">E-mail</label>
@@ -78,11 +79,13 @@
 			                        	<label class="sr-only" for="senha">Senha</label>
 			                        	<input type="password" name="entered_password" placeholder="Senha" class="form-password form-control" id="entered_password">
 			                        </div>
-			                        <button type="submit" class="btn">Acessar</button>
+			                        <button type="submit" class="btn btn-lg btn-primary btn-block">Acessar</button>
 			                    </form>
 		                    </div>
+
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-sm-6 col-sm-offset-3 social-login">
                         	<div class="social-login-buttons">

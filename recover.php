@@ -2,8 +2,8 @@
 session_start();
 set_time_limit(0);
 
-include 'config.php';
-include 'functions.php';
+require_once (__DIR__ . '/functions.php');
+require_once (__DIR__ . '/config.php');
 
 ?>
 
@@ -52,6 +52,7 @@ include 'functions.php';
                                   </div>
                                   <div class="form-group">
                                     <input class="btn btn-lg btn-primary btn-block" value="Enviar" type="button" onClick="recoverPassword();" >
+                                    <input class="btn btn-lg btn-primary btn-block" value="Livro Caixa" type="button" onClick="window.location = 'index.php';" >
                                   </div>
                                 </fieldset>
                               </form>

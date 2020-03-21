@@ -42,5 +42,39 @@ function random_password( $length = 8 )
 	return $password;
 }
 
+// Generate NEW Password
+define("MAX_LENGTH", 6);
 
-?>
+function generateHash($password) {
+    if (defined("CRYPT_BLOWFISH") && CRYPT_BLOWFISH) {
+        $salt = '$2y$11$' . substr(md5(uniqid(rand(), true)), 0, 22);
+        return crypt($password, $salt);
+    }
+}
+
+function generateHashWithSalt($password) {
+    $intermediateSalt = md5(uniqid(rand(), true));
+    $salt = substr($intermediateSalt, 0, MAX_LENGTH);
+    return hash("sha256", $password . $salt);
+}
+
+function verify($password, $hashedPassword) {
+    return crypt($password, $hashedPassword) == $hashedPassword;
+}
+
+function convertDotEnvArray($fileDotEnv) {
+
+    // Monta o array com o separador PHP_EOL.
+    $arrayDotEnv = explode(PHP_EOL, $fileDotEnv);
+
+    $arrayRetorno = array();
+    foreach ($arrayDotEnv as $item => $value) {
+        $elemento = explode('=', $value);
+
+        if ($value != '') {
+            $arrayRetorno[$elemento[0]] = $elemento[1];
+        }
+    }
+
+    return $arrayRetorno;
+}

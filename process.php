@@ -23,44 +23,24 @@ if (extension_loaded('openssl') == false) {
 set_time_limit(0);
 
 // Carrega as definições do sistema.
-include 'config.php';
-include 'functions.php';
+require_once (__DIR__ . '/functions.php');
+require_once (__DIR__ . '/config.php');
 
-// Generate NEW Password
-define("MAX_LENGTH", 6);
-
-function generateHash($password) {
-    if (defined("CRYPT_BLOWFISH") && CRYPT_BLOWFISH) {
-        $salt = '$2y$11$' . substr(md5(uniqid(rand(), true)), 0, 22);
-        return crypt($password, $salt);
-    }
-}
-
-function generateHashWithSalt($password) {
-    $intermediateSalt = md5(uniqid(rand(), true));
-    $salt = substr($intermediateSalt, 0, MAX_LENGTH);
-    return hash("sha256", $password . $salt);
-}
-
-function verify($password, $hashedPassword) {
-    return crypt($password, $hashedPassword) == $hashedPassword;
-}
-
+// Reseta a senha.
 $userEmail = $_POST['emailInput'];
 
 // Verifica o e-mail informado no banco de dados.
 $qr=mysqli_query($conn, "select id from livro_caixa.users where user = '$userEmail'");
 if (mysqli_num_rows($qr) > 0) {
-	$userPassword = random_password(8);
+    $userPassword = random_password(8);
     $password = generateHash($userPassword);
 
-	mysqli_query($conn, "UPDATE livro_caixa.users SET password = '$password' WHERE user = '$userEmail'");
-	echo mysqli_error($conn);
+    mysqli_query($conn, "UPDATE livro_caixa.users SET password = '$password' WHERE user = '$userEmail'");
+    echo mysqli_error($conn);
 } else {
-	echo 'E-Mail não encontrado!';
-	exit;
+    echo 'E-Mail não encontrado!';
+    exit;
 }
-
 
 //SMTP needs accurate times, and the PHP time zone MUST be set
 //This should be done in your php.ini, but this is how to do it if you don't have access to that

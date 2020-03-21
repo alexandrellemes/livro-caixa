@@ -3,22 +3,25 @@
 ini_set('display_errors', true);
 error_reporting(E_ALL);
 
+//session_start();
+set_time_limit(0);
+
+require_once (__DIR__ . '/functions.php');
+require_once (__DIR__ . '/config.php');
+
 /** Configuracao para o phpSecurePages **/
 $cfgProgDir =  'phpSecurePages/';
 include($cfgProgDir . "secure.php");
 
 if (isset($_GET['sair'])) {
 	$logout = true;
-	include('phpSecurePages/objects/logout.php');
+	include(__DIR__ . '/phpSecurePages/objects/logout.php');
+	header('Location: index.php');
 }
 
-//session_start();
-set_time_limit(0);
 
-include 'config.php';
-include 'functions.php';
-
-if (isset($_GET['acao']) && $_GET['acao'] == 'apagar') {
+if (isset($_GET['acao'])
+    && $_GET['acao'] == 'apagar') {
     $id = $_GET['id'];
 
     mysqli_query($conn, "DELETE FROM movimentos WHERE id='$id'");
