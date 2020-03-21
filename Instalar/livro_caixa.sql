@@ -68,7 +68,7 @@ DEFAULT CHARACTER SET = latin1;
 CREATE TABLE IF NOT EXISTS `livro_caixa`.`users` (
   `id` MEDIUMINT(8) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user` VARCHAR(50) NOT NULL,
-  `password` VARCHAR(32) NOT NULL,
+  `password` VARCHAR(128) NOT NULL,
   `userlevel` TINYINT(3) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   INDEX `user` (`user` ASC))
