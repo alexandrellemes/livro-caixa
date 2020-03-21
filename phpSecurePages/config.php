@@ -15,6 +15,10 @@
 /*           Start of phpSecurePages Configuration            */
 /**************************************************************/
 
+/**
+ * Busca a configuração do sistema
+ */
+require_once (__DIR__ . '/../config.php');
 
 /****** Installation ******/
 $cfgIndexpage = '/index.php';
@@ -60,12 +64,12 @@ $use_IP_restricted_access=false;             // Set this to true if you need to 
 $useDatabase = true;                     // Choose between using a database or data as input
 
 /* this data is necessary if a database is used */
-$cfgServerHost = 'localhost';             // MySQL hostname
-$cfgServerPort = '';                      // MySQL port - leave blank for default port
-$cfgServerUser = 'livrocaixa';            // MySQL user
-$cfgServerPassword = '123456';              // MySQL password
+$cfgServerHost = DB_HOST;             // MySQL hostname
+$cfgServerPort = DB_PORT;                      // MySQL port - leave blank for default port
+$cfgServerUser = DB_USERNAME;            // MySQL user
+$cfgServerPassword = DB_PASSWORD;              // MySQL password
 
-$cfgDbDatabase = 'livro_caixa';           // MySQL database name containing phpSecurePages table
+$cfgDbDatabase = DB_DATABASE;           // MySQL database name containing phpSecurePages table
 $cfgDbTableUsers = 'users';               // MySQL table name containing phpSecurePages user fields
 $cfgDbLoginfield = 'user';                // MySQL field name containing login word
 $cfgDbPasswordfield = 'password';         // MySQL field name containing password
