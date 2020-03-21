@@ -22,9 +22,6 @@
 
         <?php
 
-        ini_set('display_errors', true);
-        error_reporting(E_ALL);
-
         /** Configuracao para o phpSecurePages **/
         $cfgProgDir =  'phpSecurePages/';
 
@@ -69,7 +66,7 @@
         <div class="container">
             <form id="frmPDV" action="" method="GET" >
                 <fieldset>
-                    <legend>PDV - <?php echo $lc_titulo?></legend>
+                    <legend>PDV - <?php echo APP_NAME; ?></legend>
                     <div class="form-group row">
                         <label class="control-label col-md-2" for="usr">Valor da corrida:</label>
                         <div class="col-md-10">
