@@ -45,9 +45,13 @@ function random_password( $length = 8 )
 // Generate NEW Password
 define("MAX_LENGTH", 6);
 
-function generateHash($password) {
+function generateHash($password, $salt = null) {
     if (defined("CRYPT_BLOWFISH") && CRYPT_BLOWFISH) {
-        $salt = '$2y$11$' . substr(md5(uniqid(rand(), true)), 0, 22);
+        if ($salt == null) {
+            $salt = '$2y$11$' . substr(md5(uniqid(rand(), true)), 0, 22);
+        } else {
+            $salt = '$2y$11$' . substr($salt, 0, 22);
+        }
         return crypt($password, $salt);
     }
 }
@@ -72,7 +76,21 @@ function convertDotEnvArray($fileDotEnv) {
         $elemento = explode('=', $value);
 
         if ($value != '') {
-            $arrayRetorno[$elemento[0]] = $elemento[1];
+
+            $valor = $elemento[1];
+            if ($valor == 'false') {
+                $valor = false;
+            }
+
+            if ($valor == 'true') {
+                $valor = true;
+
+            }
+
+            $arrayRetorno[$elemento[0]] = $valor;
+
+            // Define os atributos configurados em .env.
+            define($elemento[0], $elemento[1]);
         }
     }
 
