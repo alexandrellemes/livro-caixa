@@ -48,21 +48,8 @@ Caso tenha o COMPOSER instalado.
 
 Após importar o banco para o MySQl.
 
-Acesse a pasta raiz do projeto, edite o arquivo 'config.php' e altere as configurações conforme o seu ambiente:
-
-### Configuração do Banco de dados
-
-$host = "localhost";
-
-$user = "livrocaixa";
-
-$pass = "123456";
-
-$d_b = "livro_caixa";
-
-### Título do seu livro Caixa, geralmente seu nome
-
-$lc_titulo="Título de sua aplicação";
+## Configuração do sistema
+Acesse a pasta raiz do projeto, edite o arquivo '.env' e altere as configurações conforme o seu ambiente.
 
 ---------------------------------------
 
