@@ -77,7 +77,7 @@ DEFAULT CHARACTER SET = latin1;
 
 USE `livro_caixa` ;
 
-insert into livro_caixa.users values(1,'admin@admin.com', md5('123456'), 1);
+insert into livro_caixa.users values(1,'admin@admin.com', '$2y$11$e10adc3949ba59abbe56eueIfJ85lE0.kOdAt9Jf.bTw0pNAb2DGG', 1);
 
 -- -----------------------------------------------------
 -- Placeholder table for view `livro_caixa`.`view_categorias`
