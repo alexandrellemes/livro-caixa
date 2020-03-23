@@ -8,7 +8,7 @@ https://github.com/fibbarth
 Algumas melhorias:
 * Inclusão da Bootstrap
 * Inclusão do phpSecurePages
-* Autenticação no banco com md5 na senha
+* Autenticação no banco com hashing e crypto na senha
 * Algumas modificações para facilitar o uso mobile
 * Modelagem do banco
 * O arquivo de modelagem e banco estão na pasta <Instalar>.
