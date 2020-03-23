@@ -12,14 +12,6 @@ $dotEnv = json_decode($jsonDotEnv);
 
 define('ENVIRONMENT', $dotEnv->APP_ENV);
 
-if (APP_DEBUG) {
-    ini_set('display_errors', true);
-    error_reporting(E_ALL);
-} else {
-    ini_set('display_errors', false);
-    error_reporting(E_);
-}
-
 /*
  *---------------------------------------------------------------
  * ERROR REPORTING
