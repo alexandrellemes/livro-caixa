@@ -138,6 +138,18 @@ if (isset($_GET['ano']))
     $ano_hoje = $_GET['ano'];
 else
     $ano_hoje = date('Y');
+
+
+// Cálculos do RESULTADO.
+$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 && mes='$mes_hoje' && ano='$ano_hoje'");
+$row=mysqli_fetch_array($qr);
+$entradas=$row['total'];
+
+$qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 && mes='$mes_hoje' && ano='$ano_hoje'");
+$row=mysqli_fetch_array($qr);
+$saidas=$row['total'];
+
+$resultado_mes=$entradas - $saidas;
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -215,11 +227,17 @@ else
     <div>
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation">
-                <a href="#AbaCalendario" id="btnAbaCalendario" aria-controls="AbaCalendario" role="tab" data-toggle="tab">Calendário</a>
-            </li>
             <li role="presentation" class="active">
                 <a href="#AbaMovimento" id="btnAbaMovimento" aria-controls="AbaMovimento" role="tab" data-toggle="tab">Movimento</a>
+            </li>
+            <li role="presentation">
+                <a href="#AbaCategorias" id="btnAbaCategorias" aria-controls="AbaCategorias" role="tab" data-toggle="tab">Categorias</a>
+            </li>
+            <li role="presentation">
+                <a href="#AbaResultado" id="btnAbaResultado" aria-controls="AbaResultado" role="tab" data-toggle="tab">Resultado</a>
+            </li>
+            <li role="presentation">
+                <a href="#AbaCalendario" id="btnAbaCalendario" aria-controls="AbaCalendario" role="tab" data-toggle="tab">Calendário</a>
             </li>
         </ul>
     </div>
@@ -227,101 +245,9 @@ else
     <!-- Tab panes -->
     <div class="tab-content">
 
-        <div role="tabpane2" class="tab-pane" id="AbaCalendario">
-            <br>
-            <legend class="panel-title"></legend>
-            <br>
-            <div id="calendar"></div>
-            <br>
-            <br>
-        </div>
-
-        <div role="tabpanel" class="tab-pane active" id="AbaMovimento">
+        <div class="tab-pane active" id="AbaMovimento">
             <br>
             <h2><?php echo mostraMes($mes_hoje)?>/<?php echo $ano_hoje?></h2>
-            <br>
-
-            <fieldset>
-                <legend class="panel-title">Entradas e Saídas deste mês</legend>
-                <br>
-                <br>
-                <?php
-                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 && mes='$mes_hoje' && ano='$ano_hoje'");
-                $row=mysqli_fetch_array($qr);
-                $entradas=$row['total'];
-
-                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 && mes='$mes_hoje' && ano='$ano_hoje'");
-                $row=mysqli_fetch_array($qr);
-                $saidas=$row['total'];
-
-                $resultado_mes=$entradas-$saidas;
-                ?>
-
-                <div class="form-group row">
-
-                    <table class="table" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                            <td><span style="font-size:18px; color:#030">Entradas:</span></td>
-                            <td align="right"><span style="font-size:18px; color:#030"><?php echo formata_dinheiro($entradas) ?></span></td>
-                        </tr>
-                        <tr>
-                            <td><span style="font-size:18px; color:#C00">Saídas:</span></td>
-                            <td align="right"><span style="font-size:18px; color:#C00"><?php echo formata_dinheiro($saidas) ?></span></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <hr size="1" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong style="font-size:22px; color:<?php if ($resultado_mes < 0) echo "#C00"; else echo "#030" ?>">Resultado:</strong></td>
-                            <td align="right"><strong style="font-size:22px; color:<?php if ($resultado_mes < 0) echo "#C00"; else echo "#030" ?>"><?php echo formata_dinheiro($resultado_mes) ?></strong></td>
-                        </tr>
-                    </table>
-                </div>
-
-            </fieldset>
-            <br>
-            <fieldset>
-                <legend class="panel-title">Balanço Geral</legend>
-                <br>
-                <br>
-                <?php
-
-                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 ");
-                $row=mysqli_fetch_array($qr);
-                $entradas=$row['total'];
-
-                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 ");
-                $row=mysqli_fetch_array($qr);
-                $saidas=$row['total'];
-
-                $resultado_geral=$entradas-$saidas;
-                ?>
-
-                <div class="form-group row">
-                    <table class="table" cellpadding="0" cellspacing="0" width="100%">
-                        <tr>
-                            <td><span style="font-size:18px; color:#030">Entradas:</span></td>
-                            <td align="right"><span style="font-size:18px; color:#030"><?php echo formata_dinheiro($entradas)?></span></td>
-                        </tr>
-                        <tr>
-                            <td><span style="font-size:18px; color:#C00">Saídas:</span></td>
-                            <td align="right"><span style="font-size:18px; color:#C00"><?php echo formata_dinheiro($saidas)?></span></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                <hr size="1" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong style="font-size:22px; color:<?php if ($resultado_geral<0) echo "#C00"; else echo "#030"?>">Resultado:</strong></td>
-                            <td align="right"><strong style="font-size:22px; color:<?php if ($resultado_geral<0) echo "#C00"; else echo "#030"?>"><?php echo formata_dinheiro($resultado_geral)?></strong></td>
-                        </tr>
-                    </table>
-                </div>
-            </fieldset>
-
             <br>
 
             <div class="table-responsive">
@@ -535,8 +461,6 @@ else
                                 </form>
                             </div>
 
-
-
                         </td>
                     </tr>
                     <?php
@@ -650,6 +574,303 @@ else
             </div>
 
         </div>
+
+        <div class="tab-pane active" id="AbaCategorias">
+            <br>
+
+            <div class="table-responsive">
+                <table class="table" cellpadding="10" cellspacing="0" width="auto" align="center">
+                    <tr>
+                        <td align="right">
+                            <a href="javascript:;" onclick="abreFecha('add_cat')" class="bnt">[+] Adicionar Categoria</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3" >
+
+                            <?php if (isset($_GET['cat_err']) && $_GET['cat_err']==1) { ?>
+
+                                <div style="padding:5px; background-color:#FF6; text-align:center; color:#030">
+                                    <strong>Esta categoria não pode ser removida, pois há movimentos associados a esta</strong>
+                                </div>
+
+                            <?php } ?>
+
+                            <?php if (isset($_GET['cat_ok']) && $_GET['cat_ok']==2) { ?>
+
+                                <div style="padding:5px; background-color:#FF6; text-align:center; color:#030">
+                                    <strong>Categoria removida com sucesso!</strong>
+                                </div>
+
+                            <?php } ?>
+
+                            <?php if (isset($_GET['cat_ok']) && $_GET['cat_ok']==1) { ?>
+
+                                <div style="padding:5px; background-color:#FF6; text-align:center; color:#030">
+                                    <strong>Categoria Cadastrada com sucesso!</strong>
+                                </div>
+
+                            <?php } ?>
+
+                            <?php if (isset($_GET['cat_ok']) && $_GET['cat_ok']==3) { ?>
+
+                                <div style="padding:5px; background-color:#FF6; text-align:center; color:#030">
+                                    <strong>Categoria alterada com sucesso!</strong>
+                                </div>
+
+                            <?php } ?>
+
+                            <?php if (isset($_GET['ok']) && $_GET['ok']==1) { ?>
+
+                                <div style="padding:5px; background-color:#FF6; text-align:center; color:#030">
+                                    <strong>Movimento Cadastrado com sucesso!</strong>
+                                </div>
+
+                            <?php } ?>
+
+                            <?php if (isset($_GET['ok']) && $_GET['ok']==2) { ?>
+
+                                <div style="padding:5px; background-color:#900; text-align:center; color:#FFF">
+                                    <strong>Movimento removido com sucesso!</strong>
+                                </div>
+
+                            <?php } ?>
+
+                            <?php if (isset($_GET['ok']) && $_GET['ok']==3) { ?>
+
+                                <div style="padding:5px; background-color:#FF6; text-align:center; color:#030">
+                                    <strong>Movimento alterado com sucesso!</strong>
+                                </div>
+
+                            <?php } ?>
+
+                            <div style=" background-color:#F1F1F1; padding:10px; border:1px solid #999; margin:5px; display:none" id="add_cat">
+                                <h3>Adicionar Categoria</h3>
+                                <div class="table-responsive">
+                                    <table class="table" width="100%">
+                                        <tr>
+                                            <td valign="top">
+
+                                                <form method="post" action="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>">
+                                                    <input type="hidden" name="acao" value="2" />
+
+                                                    Nome: <input type="text" name="nome" size="20" maxlength="50" />
+
+                                                    <br />
+                                                    <br />
+
+                                                    <input type="submit" class="input" value="Enviar" />
+                                                </form>
+
+                                            </td>
+                                            <td valign="top" align="right">
+                                                <b>Editar/Remover Categorias:
+                                                </b>
+                                                <br/>
+                                                <br/>
+                                                <?php
+                                                $qr = mysqli_query($conn, "SELECT id, nome FROM categorias");
+                                                while ($row = mysqli_fetch_array($qr)) {
+                                                    ?>
+                                                    <div id="editar2_cat_<?php echo $row['id']?>">
+                                                        <?php echo $row['nome']?>
+
+                                                        <a style="font-size:10px; color:#666" onclick="return confirm('Tem certeza que deseja remover esta categoria?\nAtenção: Apenas categorias sem movimentos associados poderão ser removidas.')" href="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>&acao=apagar_cat&id=<?php echo $row['id']?>" title="Remover">[remover]</a>
+                                                        <a href="javascript:;" style="font-size:10px; color:#666" onclick="document.getElementById('editar_cat_<?php echo $row['id']?>').style.display=''; document.getElementById('editar2_cat_<?php echo $row['id']?>').style.display='none'" title="Editar">[editar]</a>
+
+                                                    </div>
+                                                    <div style="display:none" id="editar_cat_<?php echo $row['id']?>">
+
+                                                        <form method="post" action="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>">
+                                                            <input type="hidden" name="acao" value="editar_cat" />
+                                                            <input type="hidden" name="id" value="<?php echo $row['id']?>" />
+                                                            <input type="text" name="nome" value="<?php echo $row['nome']?>" size="20" maxlength="50" />
+                                                            <input type="submit" class="input" value="Alterar" />
+                                                        </form>
+                                                    </div>
+
+                                                <?php } ?>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div style=" background-color:#F1F1F1; padding:10px; border:1px solid #999; margin:5px; display:none" id="add_movimento">
+                                <h3>Adicionar Movimento</h3>
+                                <?php
+                                $qr=mysqli_query($conn, "SELECT * FROM categorias");
+                                if (mysqli_num_rows($qr)==0)
+                                    echo "Adicione ao menos uma categoria";
+
+                                else { ?>
+                                    <form method="post" action="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>">
+                                        <input type="hidden" name="acao" value="1" />
+                                        <strong>Data:</strong><br />
+                                        <input type="text" name="data" size="11" maxlength="10" value="<?php echo date('d')?>/<?php echo $mes_hoje?>/<?php echo $ano_hoje?>" />
+
+                                        <br />
+                                        <br />
+
+                                        <strong>Tipo:<br /></strong>
+                                        <label for="tipo_receita" style="color:#030"><input type="radio" name="tipo" value="1" id="tipo_receita" /> Receita</label>&nbsp;
+                                        <label for="tipo_despesa" style="color:#C00"><input type="radio" name="tipo" value="0" id="tipo_despesa" /> Despesa</label>
+
+                                        <br />
+                                        <br />
+
+                                        <strong>Categoria:</strong>
+                                        <br />
+                                        <select name="categoria">
+                                            <?php while ($row = mysqli_fetch_array($qr)) { ?>
+                                                <option value="<?php echo $row['id']?>"><?php echo $row['nome']?></option>
+                                            <?php } ?>
+                                        </select>
+
+                                        <br />
+                                        <br />
+
+                                        <strong>Descrição:</strong>
+                                        <br />
+                                        <input type="text" name="descricao" size="100" maxlength="255" />
+
+                                        <br />
+                                        <br />
+
+                                        <strong>Valor:</strong>
+                                        <br />
+                                        <input type="text" name="valor" id="valor" size="8" maxlength="10" data-symbol="R$ " data-thousands="." data-decimal="," />
+                                        <br />
+                                        <br />
+
+                                        <input type="submit" class="input" value="Enviar" />
+
+                                    </form>
+                                <?php } ?>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <br>
+                <table class="table" cellpadding="5" cellspacing="0" width="auto" align="center">
+
+                    <?php
+                    $qr = mysqli_query($conn, "SELECT id, nome FROM view_categorias");
+                    while ($row = mysqli_fetch_array($qr)) {
+                        ?>
+                        <div id="editar2_cat_<?php echo $row['id']?>">
+                            <?php echo $row['nome']?>
+
+                            <a style="font-size:10px; color:#666" onclick="return confirm('Tem certeza que deseja remover esta categoria?\nAtenção: Apenas categorias sem movimentos associados poderão ser removidas.')" href="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>&acao=apagar_cat&id=<?php echo $row['id']?>" title="Remover">[remover]</a>
+                            <a href="javascript:;" style="font-size:10px; color:#666" onclick="document.getElementById('editar_cat_<?php echo $row['id']?>').style.display='block'; document.getElementById('editar2_cat_<?php echo $row['id']?>').style.display='none'" title="Editar">[editar]</a>
+
+                        </div>
+                        <div style="display:none" id="editar_cat_<?php echo $row['id']?>">
+
+                            <form method="post" action="?mes=<?php echo $mes_hoje?>&ano=<?php echo $ano_hoje?>">
+                                <input type="hidden" name="acao" value="editar_cat" />
+                                <input type="hidden" name="id" value="<?php echo $row['id']?>" />
+                                <input type="text" name="nome" value="<?php echo $row['nome']?>" size="20" maxlength="50" />
+                                <input type="submit" class="input" value="Alterar" />
+                            </form>
+                        </div>
+
+                    <?php } ?>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="tab-pane" id="AbaResultado">
+            <br>
+            <legend class="panel-title"></legend>
+            <br>
+
+            <fieldset>
+                <legend class="panel-title">Entradas e Saídas deste mês</legend>
+                <br>
+                <br>
+                <div class="form-group row">
+
+                    <table class="table" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                            <td><span style="font-size:18px; color:#030">Entradas:</span></td>
+                            <td align="right"><span style="font-size:18px; color:#030"><?php echo formata_dinheiro($entradas) ?></span></td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-size:18px; color:#C00">Saídas:</span></td>
+                            <td align="right"><span style="font-size:18px; color:#C00"><?php echo formata_dinheiro($saidas) ?></span></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <hr size="1" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong style="font-size:22px; color:<?php if ($resultado_mes < 0) echo "#C00"; else echo "#030" ?>">Resultado:</strong></td>
+                            <td align="right"><strong style="font-size:22px; color:<?php if ($resultado_mes < 0) echo "#C00"; else echo "#030" ?>"><?php echo formata_dinheiro($resultado_mes) ?></strong></td>
+                        </tr>
+                    </table>
+                </div>
+
+            </fieldset>
+            <br>
+            <fieldset>
+                <legend class="panel-title">Balanço Geral</legend>
+                <br>
+                <br>
+                <?php
+
+                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=1 ");
+                $row=mysqli_fetch_array($qr);
+                $entradas = $row['total'];
+
+                $qr=mysqli_query($conn, "SELECT SUM(valor) as total FROM movimentos WHERE tipo=0 ");
+                $row=mysqli_fetch_array($qr);
+                $saidas = $row['total'];
+
+                $resultado_geral = $entradas-$saidas;
+                ?>
+
+                <div class="form-group row">
+                    <table class="table" cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                            <td><span style="font-size:18px; color:#030">Entradas:</span></td>
+                            <td align="right"><span style="font-size:18px; color:#030"><?php echo formata_dinheiro($entradas)?></span></td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-size:18px; color:#C00">Saídas:</span></td>
+                            <td align="right"><span style="font-size:18px; color:#C00"><?php echo formata_dinheiro($saidas)?></span></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <hr size="1" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong style="font-size:22px; color:<?php if ($resultado_geral<0) echo "#C00"; else echo "#030"?>">Resultado:</strong></td>
+                            <td align="right"><strong style="font-size:22px; color:<?php if ($resultado_geral<0) echo "#C00"; else echo "#030"?>"><?php echo formata_dinheiro($resultado_geral)?></strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </fieldset>
+
+            <br>
+            <br>
+        </div>
+
+        <div class="tab-pane" id="AbaCalendario">
+            <br>
+            <legend class="panel-title"></legend>
+            <br>
+            <div id="calendar"></div>
+            <br>
+            <br>
+        </div>
+
     </div>
 
     <br />
