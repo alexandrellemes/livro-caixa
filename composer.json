@@ -8,6 +8,7 @@
     "require": {
         "phpmailer/phpmailer": "^5.2",
         "phpunit/phpunit": "^6.1",
-        "sendgrid/sendgrid": "~7"
+        "sendgrid/sendgrid": "~7",
+        "facebook/graph-sdk": "^5.7"
     }
 }
