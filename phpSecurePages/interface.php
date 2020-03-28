@@ -16,6 +16,22 @@
 /*      try to access protected pages. Change logo to your    */
 /*                  logo on line 77 below.                    */
 /**************************************************************/
+
+require_once __DIR__ . '/../vendor/autoload.php'; //autoload do composer
+
+$fb = new Facebook\Facebook([
+    'app_id' => '{app-id}',
+    'app_secret' => '{app-secret}',
+    'default_graph_version' => 'v2.10',
+]);
+
+$helper = $fb->getRedirectLoginHelper();
+
+$permissions = ['email']; // Permissões Opcionais
+$loginUrl = $helper->getLoginUrl(APP_URL . '/fb-callback.php', $permissions); //Url de retorno onde iremos ter a validação do login. O domínio deverá ser configurado no seu app.
+
+//echo '<a href="' . $loginUrl . '">Logar no seu Facebook!</a>';
+
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -89,7 +105,7 @@
                     <div class="row">
                         <div class="col-sm-6 col-sm-offset-3 social-login">
                         	<div class="social-login-buttons">
-	                        	<a class="btn btn-link-2" href="#">
+	                        	<a class="btn btn-link-2" href="<?php echo $loginUrl; ?>">
 	                        		<i class="fa fa-facebook"></i> Facebook
 	                        	</a>
 	                        	<a class="btn btn-link-2" href="#">
