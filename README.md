@@ -49,11 +49,11 @@ Caso tenha o COMPOSER instalado.
 Após importar o banco para o MySQl.
 
 ## Configuração do sistema
-####Arquivo .ENV
+#### Arquivo .ENV
 
 Acesse a pasta raiz do projeto, edite o arquivo '.env' e altere as configurações conforme o seu ambiente.
 
-####Observação: 
+#### Observação: 
 
 As outras bibliotecas estão integradas com a configuração do sistema.
 
