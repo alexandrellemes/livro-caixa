@@ -18,6 +18,7 @@ Algumas melhorias:
 * Retirada de cores em excesso.
 * Inclusão do PDV
 * Envio de e-mail para recuperar senha.
+* Login via biblioteca Facebook-SDK, como exemplo.
 
 ## PDV
 
