@@ -24,6 +24,7 @@ return array(
     'SendGrid\\' => array($vendorDir . '/sendgrid/php-http-client/lib'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
     'Prophecy\\' => array($vendorDir . '/phpspec/prophecy/src/Prophecy'),
+    'Facebook\\' => array($vendorDir . '/facebook/graph-sdk/src/Facebook'),
     'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
 );

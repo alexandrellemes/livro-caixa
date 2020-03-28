@@ -10,6 +10,7 @@ class ComposerStaticInitaf109835a78be80f43edb4367f751410
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        'c65d09b6820da036953a371c8c73a9b1' => __DIR__ . '/..' . '/facebook/graph-sdk/src/Facebook/polyfills.php',
         '3f8bdd3b35094c73a26f0106e3c0f8b2' => __DIR__ . '/..' . '/sendgrid/sendgrid/lib/SendGrid.php',
     );
 
@@ -43,6 +44,10 @@ class ComposerStaticInitaf109835a78be80f43edb4367f751410
         array (
             'Psr\\Log\\' => 8,
             'Prophecy\\' => 9,
+        ),
+        'F' => 
+        array (
+            'Facebook\\' => 9,
         ),
         'D' => 
         array (
@@ -125,6 +130,10 @@ class ComposerStaticInitaf109835a78be80f43edb4367f751410
         'Prophecy\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpspec/prophecy/src/Prophecy',
+        ),
+        'Facebook\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/facebook/graph-sdk/src/Facebook',
         ),
         'Doctrine\\Instantiator\\' => 
         array (
