@@ -49,7 +49,13 @@ Caso tenha o COMPOSER instalado.
 Após importar o banco para o MySQl.
 
 ## Configuração do sistema
+####Arquivo .ENV
+
 Acesse a pasta raiz do projeto, edite o arquivo '.env' e altere as configurações conforme o seu ambiente.
+
+####Observação: 
+
+As outras bibliotecas estão integradas com a configuração do sistema.
 
 ---------------------------------------
 
@@ -61,26 +67,22 @@ Senha: 123456
 
 ---------------------------------------
 
-### Configuração phpSecurePages
-
-Edite o arquivo "config.php", dentro da pasta phpSecurePages e configure o acesso ao banco de dados.
-
-### Configuração PHPMailer
-
-Edite o arquivo "process.php" e atualize as informações de e-mail, conta, porta e protocolo de segurança.
-
-
 ### Frameworks/Bibliotecas
 * [twbs/bootstrap](https://github.com/twbs/bootstrap) 
 * [jquery/jquery](https://github.com/jquery/jquery) 
 * [jquery/jquery-ui](https://github.com/jquery/jquery-ui) 
 * [phpSecurePages](http://www.phpsecurepages.com/) 
 * [FullCalendar](http://fullcalendar.io) 
+* [Facebook](https://developers.facebook.com) 
 
 ### Requerimento
 * PHP >= 5.6.0
 * MySQL
 * Atualmente rodando no PHP 7.4.
+
+### Tutoriais
+#### Facebook
+* [Acessando API Facebook](https://imasters.com.br/back-end/acessando-api-facebook-em-php-com-o-php-graph-sdk)
 
 ### Créditos
 * Felipe Barth fibbarth@gmail.com
