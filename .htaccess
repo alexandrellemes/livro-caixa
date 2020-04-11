@@ -1,0 +1,25 @@
+Options +FollowSymLinks -MultiViews
+# Turn mod_rewrite on
+RewriteEngine On
+RewriteBase /
+
+# Chamada simples da API
+RewriteRule ^api/?$ /api.php?$1 [L,QSA,NC]
+
+# Chamada da API => /api/usuarios/?
+RewriteRule ^api/usuarios/?$ /api.php?usuarios=$1 [L,QSA,NC]
+RewriteRule ^api/usuarios/([0-9]+)/?$ /api.php?usuarios=$1 [L,QSA,NC]
+
+# Chamada da API => /api/categorias/?
+RewriteRule ^api/categorias/?$ /api.php?categorias=$1 [L,QSA,NC]
+RewriteRule ^api/categorias/([0-9]+)/?$ /api.php?categorias=$1 [L,QSA,NC]
+
+# Chamada da API => /api/movimentos/?
+RewriteRule ^api/movimentos/?$ /api.php?movimentos=$1 [L,QSA,NC]
+RewriteRule ^api/movimentos/([0-9]+)/?$ /api.php?movimentos=$1 [L,QSA,NC]
+
+# Chamada do PDV.
+RewriteRule ^pdv/?$ /pdv.php?$1 [L,QSA,NC]
+
+# Chamada do Recover.
+RewriteRule ^recover/?$ /recover.php?$1 [L,QSA,NC]
