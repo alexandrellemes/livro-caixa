@@ -19,6 +19,8 @@ Algumas melhorias:
 * Inclusão do PDV
 * Envio de e-mail para recuperar senha.
 * Login via biblioteca Facebook-SDK, como exemplo.
+* Acréscimo do módulo API.php para retorno via JSON das tabelas: usuarios, categorias e movimentos.
+* Início da APP / Flutter com uso da API.
 
 ## PDV
 
