@@ -1,14 +1,9 @@
 <?php
 
 /**
- * Leitura do arquivo .env
+ * Leitura do arquivo .env em DEFINEs e STDCLASS.
  */
-$fileDotEnv = file_get_contents(__DIR__ . '/.env');
-
-$arrayDotEnv = convertDotEnvArray($fileDotEnv);
-
-$jsonDotEnv = json_encode($arrayDotEnv);
-$dotEnv = json_decode($jsonDotEnv);
+$dotEnv = convertDotEnv(__DIR__ . '/.env');
 
 define('ENVIRONMENT', $dotEnv->APP_ENV);
 
