@@ -66,7 +66,9 @@ function verify($password, $hashedPassword) {
     return crypt($password, $hashedPassword) == $hashedPassword;
 }
 
-function convertDotEnvArray($fileDotEnv) {
+function convertDotEnv($fileDotEnv) {
+
+    $fileDotEnv = file_get_contents($fileDotEnv);
 
     // Monta o array com o separador PHP_EOL.
     $arrayDotEnv = explode(PHP_EOL, $fileDotEnv);
@@ -94,5 +96,8 @@ function convertDotEnvArray($fileDotEnv) {
         }
     }
 
-    return $arrayRetorno;
+    $jsonDotEnv = json_encode($arrayRetorno);
+    $dotEnv = json_decode($jsonDotEnv);
+
+    return $dotEnv;
 }
