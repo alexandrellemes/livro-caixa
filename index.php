@@ -895,7 +895,7 @@ $resultado_mes=$entradas - $saidas;
     
     <script src="js/jquery.maskMoney.js" type="text/javascript"></script>
 
-    <script type="text/javascript" src="scripts.js"></script>
+    <script src="js/scripts.js" type="text/javascript"></script>
 
     <!-- Full Calendar -->
     <script src="js/moment.js"></script>
