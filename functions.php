@@ -66,6 +66,11 @@ function verify($password, $hashedPassword) {
     return crypt($password, $hashedPassword) == $hashedPassword;
 }
 
+/**
+ * Converte as diretivas do arquivo .env em DEFINEs e stdClass.
+ * @param $fileDotEnv
+ * @return mixed
+ */
 function convertDotEnv($fileDotEnv) {
 
     $fileDotEnv = file_get_contents($fileDotEnv);
@@ -75,11 +80,15 @@ function convertDotEnv($fileDotEnv) {
 
     $arrayRetorno = array();
     foreach ($arrayDotEnv as $item => $value) {
-        $elemento = explode('=', $value);
+
+        $value = trim($value);
 
         if ($value != '') {
 
-            $valor = $elemento[1];
+            $elemento = explode('=', $value);
+
+            $chave = trim($elemento[0]);
+            $valor = trim($elemento[1]);
             if ($valor == 'false') {
                 $valor = false;
             }
@@ -89,10 +98,10 @@ function convertDotEnv($fileDotEnv) {
 
             }
 
-            $arrayRetorno[$elemento[0]] = $valor;
+            $arrayRetorno[$chave] = $valor;
 
             // Define os atributos configurados em .env.
-            define($elemento[0], $elemento[1]);
+            define($chave, $valor);
         }
     }
 
