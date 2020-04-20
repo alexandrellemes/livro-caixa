@@ -869,6 +869,20 @@ $resultado_mes=$entradas - $saidas;
             <div id="calendar"></div>
             <br>
             <br>
+            <div id="calendarModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
+                            <h4 id="modalTitle" class="modal-title"></h4>
+                        </div>
+                        <div id="modalBody" class="modal-body"> </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -928,7 +942,8 @@ while ($row = mysqli_fetch_array($query)) {
 
     $eventos[] = array(
         'id' => $contador,
-        'title' => $nomeCategoria . ' - ' . $row['descricao'],
+        'title' => $nomeCategoria . ' - ' . substr($row['descricao'],0,10),
+        'description' => $row['descricao'],
         'start' => $row['ano'] . '-' . str_pad($row['mes'], 2, '0', STR_PAD_LEFT) . '-'. $row['dia'],
         'end' => $row['ano'] . '-'. str_pad($row['mes'], 2, '0', STR_PAD_LEFT) . '-' . $row['dia'],
         'color' => $cor
@@ -1032,12 +1047,11 @@ $jsonEventos = json_encode($eventos);
               }
           },
           eventClick: function(info) {
-              alert('Event: ' + info.event.title);
-              alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
-              alert('View: ' + info.view.type);
 
-              // change the border color just for fun
-              info.el.style.borderColor = 'red';
+              $('#modalTitle').html(info.title);
+              $('#modalBody').html(info.description);
+
+              $('#calendarModal').modal();
           }
       });
 
