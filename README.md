@@ -58,7 +58,11 @@ Acesse a pasta raiz do projeto, edite o arquivo '.env' e altere as configuraçõ
 
 #### Observação: 
 
-As outras bibliotecas estão integradas com a configuração do sistema.
+1. As outras bibliotecas estão integradas com a configuração do sistema.
+2. Os ambientes para a diretiva APP_ENV, do arquivo .env são:
+   1. development
+   2. testing
+   3. production
 
 ---------------------------------------
 

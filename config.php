@@ -42,6 +42,45 @@ switch (ENVIRONMENT) {
 //Não altere a partir daqui!
 //////////////////////////////////////
 
+
+// Cria uma conexão com o servidor.
+$conn = mysqli_connect(DB_HOST, DB_USERNAME, DB_PASSWORD);
+
+// Verifica a conexão
+if ($conn == false) {
+    die("Não foi possível conectar ao banco: " . mysqli_connect_error());
+}
+
+// Seleciona o banco de dados.
+$dbSelected = mysqli_select_db($conn, DB_DATABASE);
+
+// Caso não exista, cria o banco de dados e as tabelas.
+if ($dbSelected == false) {
+    $sql = 'CREATE DATABASE ' . DB_DATABASE;
+
+    if (mysqli_query($conn, $sql) == false) {
+        die('Erro ao criar o banco de dados: ' . mysqli_error($conn));
+    }
+}
+
+// Conecta novamente no servidor com o banco criado.
+$conn = mysqli_connect(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_DATABASE) or die("Erro na conexão com a base de dados");
+
+// Verifica se tem alguma tabela no banco
+$result = mysqli_query($conn, 'show tables');
+
+if ( $result->num_rows == 0 ) {
+    // Carrega o arquivo de dump
+    $sql = file_get_contents(__DIR__ . '/instalar/livro_caixa.sql');
+
+    // Carrega as tabelas.
+
+
+    // Executa o arquivo com o dump.
+    $conn->multi_query($sql);
+
+}
+
 $conn = mysqli_connect(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_DATABASE) or die("Erro na conexão com a base de dados");
 $db = mysqli_select_db($conn, DB_DATABASE) or die("Erro na seleção da base de dados");
 
