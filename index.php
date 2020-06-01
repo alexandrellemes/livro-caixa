@@ -6,8 +6,10 @@ error_reporting(E_ALL);
 //session_start();
 set_time_limit(0);
 
-require_once (__DIR__ . '/functions.php');
-require_once (__DIR__ . '/config.php');
+define('DS', DIRECTORY_SEPARATOR);
+
+require_once ('functions.php');
+require_once ('config.php');
 
 // Gera a senha inicial : 123456
 //$salt = md5('123456');
@@ -15,13 +17,13 @@ require_once (__DIR__ . '/config.php');
 //die('<br>Senha inicial.');
 
 /** Configuracao para o phpSecurePages **/
-$cfgProgDir =  'phpSecurePages/';
+$cfgProgDir =  'phpSecurePages' . DS;
 include($cfgProgDir . "secure.php");
 
 if (isset($_GET['sair'])) {
 	$logout = true;
-	include(__DIR__ . '/phpSecurePages/objects/logout.php');
-	header('Location: /');
+	include(__DIR__ . DS . 'phpSecurePages' . DS . 'objects' . DS . 'logout.php');
+	header('Location: ' . DS);
 }
 
 
