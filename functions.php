@@ -73,15 +73,10 @@ function verify($password, $hashedPassword) {
  */
 function convertDotEnv($fileDotEnv) {
 
-    $fileDotEnv = file_get_contents($fileDotEnv);
 
-    // Monta o array com o separador PHP_EOL.
-    $arrayDotEnv = explode(PHP_EOL, $fileDotEnv);
+    foreach (file($fileDotEnv) as $linha) {
 
-    $arrayRetorno = array();
-    foreach ($arrayDotEnv as $item => $value) {
-
-        $value = trim($value);
+        $value = trim($linha);
 
         if ($value != '') {
 
@@ -103,6 +98,7 @@ function convertDotEnv($fileDotEnv) {
             // Define os atributos configurados em .env.
             define($chave, $valor);
         }
+
     }
 
     $jsonDotEnv = json_encode($arrayRetorno);
