@@ -6,7 +6,7 @@
         "bin-dir": "bin/"
     },
     "require": {
-        "phpmailer/phpmailer": "^5.2",
+        "phpmailer/phpmailer": "^6.5",
         "phpunit/phpunit": "^6.1",
         "sendgrid/sendgrid": "~7",
         "facebook/graph-sdk": "^5.7"
