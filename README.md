@@ -34,9 +34,9 @@ Uso: seu.dominio/recover.php
 ﻿Seguem instruções de instalação e configuração
 ----------------------------------------------
 
-O arquivo para criação do banco de dados é o livro_caixa.sql.
+O arquivo para criação do banco de dados está na pasta: Instalar/livro_caixa.sql.
 
-O arquivo com a modelagm está na pasta Instalar
+O arquivo com a modelagm está na pasta Instalar também.
 
 Rode o COMPOSER, a partir da raiz da aplicação, para instalar as dependências:
 
