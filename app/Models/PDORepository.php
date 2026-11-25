@@ -50,6 +50,26 @@ final class PDORepository
         ];
     }
 
+    /**
+     * Saldo (entradas - saídas) de cada mês do ano informado.
+     * Retorna [mes => saldo]; meses sem movimento não aparecem.
+     */
+    public function getSaldosPorMes(string $ano): array
+    {
+        $stmt = $this->connection->prepare(
+            'SELECT mes, COALESCE(SUM(CASE WHEN tipo = 1 THEN valor ELSE -valor END), 0) AS saldo
+             FROM movimentos WHERE ano = :ano GROUP BY mes'
+        );
+        $stmt->execute([':ano' => $ano]);
+
+        $saldos = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $saldos[(int) $row['mes']] = (float) $row['saldo'];
+        }
+
+        return $saldos;
+    }
+
     public function getResumoGeral(): array
     {
         $stmtEntradas = $this->connection->query('SELECT COALESCE(SUM(valor), 0) AS total FROM movimentos WHERE tipo = 1');
