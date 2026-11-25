@@ -145,6 +145,48 @@ final class LivroCaixaService
      * Aceita formato brasileiro ("R$ 1.234,56") e americano ("1,234.56"):
      * o último separador seguido de 1 ou 2 dígitos é o decimal; os demais são de milhar.
      */
+    /** Formas de lançamento do PDV: [tipo do movimento, rótulo usado na descrição]. */
+    public const PDV_FORMAS = [
+        'dinheiro' => [1, 'Receita em dinheiro'],
+        'cartao' => [1, 'Receita no cartão'],
+        'despesa' => [0, 'Despesa'],
+    ];
+
+    /**
+     * Lançamento rápido do PDV, sempre com a data de hoje.
+     *
+     * @return int id do movimento criado
+     * @throws \InvalidArgumentException quando os dados são inválidos
+     */
+    public function lancarPdv(string $valor, string $forma, int $categoriaId, string $observacao = ''): int
+    {
+        if (!isset(self::PDV_FORMAS[$forma])) {
+            throw new \InvalidArgumentException('Forma de lançamento inválida.');
+        }
+
+        $valorNormalizado = $this->normalizarValor($valor);
+        if ((float) $valorNormalizado <= 0) {
+            throw new \InvalidArgumentException('Informe um valor maior que zero.');
+        }
+
+        if ($this->buscarCategoria($categoriaId) === null) {
+            throw new \InvalidArgumentException('Selecione uma categoria válida.');
+        }
+
+        [$tipo, $rotulo] = self::PDV_FORMAS[$forma];
+        $observacao = trim($observacao);
+
+        return $this->criarMovimento([
+            'dia' => date('d'),
+            'mes' => date('m'),
+            'ano' => date('Y'),
+            'tipo' => (string) $tipo,
+            'descricao' => 'PDV - ' . $rotulo . ($observacao !== '' ? ': ' . mb_substr($observacao, 0, 200) : ''),
+            'valor' => $valorNormalizado,
+            'categoria_id' => (string) $categoriaId,
+        ]);
+    }
+
     public function repository(): PDORepository
     {
         return $this->repository;

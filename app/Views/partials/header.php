@@ -21,6 +21,7 @@
             <a href="/categorias/listar" class="<?= (($data['activeMenu'] ?? '') === 'categorias') ? 'active' : '' ?>">Categorias</a>
             <a href="/movimentos/listar" class="<?= (($data['activeMenu'] ?? '') === 'movimentos') ? 'active' : '' ?>">Movimentos</a>
             <?php if (($_SESSION['auth']['role'] ?? '') === 'admin'): ?>
+                <a href="/pdv" class="<?= (($data['activeMenu'] ?? '') === 'pdv') ? 'active' : '' ?>">PDV</a>
                 <a href="/logs" class="<?= (($data['activeMenu'] ?? '') === 'logs') ? 'active' : '' ?>">Logs</a>
             <?php endif; ?>
             <a href="/logout">Sair</a>

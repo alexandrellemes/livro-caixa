@@ -9,6 +9,7 @@ use App\Models\PDORepository;
 use App\Services\LivroCaixaService;
 use App\Support\Auth;
 use App\Support\Csrf;
+use App\Support\Env;
 use App\Support\Logger;
 use App\Support\Mailer;
 use App\Support\PasswordReset;
@@ -219,7 +220,7 @@ final class LivroCaixaController
             }
 
             $token = PasswordReset::createToken($user['username']);
-            $link = rtrim((string) (getenv('APP_URL') ?: 'http://localhost'), '/') . '/redefinir-senha/' . $token;
+            $link = rtrim((string) Env::get('APP_URL', 'http://localhost'), '/') . '/redefinir-senha/' . $token;
             $message = "Recebemos uma solicitação para redefinir sua senha.\n\nAcesse: {$link}\n\nSe você não fez esta solicitação, ignore este e-mail.";
             $sent = Mailer::send($user['email'] ?? $user['username'], 'Recuperação de senha', $message);
 
@@ -233,7 +234,9 @@ final class LivroCaixaController
             if ($sent) {
                 $data['success'] = 'Um link de recuperação foi enviado para o e-mail cadastrado.';
             } else {
-                $data['errors'] = ['Não foi possível enviar o e-mail. Configure SENDGRID_API_KEY e MAIL_FROM_ADDRESS para habilitar a entrega real.'];
+                $data['errors'] = [Mailer::isConfigured()
+                    ? 'Não foi possível enviar o e-mail agora. Tente novamente mais tarde.'
+                    : 'O envio de e-mail não está configurado. Defina SENDGRID_API_KEY ou os dados de SMTP (MAIL_HOST etc.) no .env.'];
             }
             require __DIR__ . '/../Views/auth/recover.php';
             return;

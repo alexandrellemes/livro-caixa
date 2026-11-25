@@ -5,6 +5,7 @@ namespace App;
 use App\Api\ApiKernel;
 use App\Controllers\LivroCaixaController;
 use App\Controllers\LogController;
+use App\Controllers\PdvController;
 use App\Support\Auth;
 use App\Support\Csrf;
 use App\Support\Session;
@@ -27,6 +28,12 @@ final class Routes
         if ($path === 'login') {
             $controller->loginAction();
             return;
+        }
+
+        // Endereços antigos da recuperação de senha.
+        if (in_array($path, ['recover', 'recover.php', 'process.php'], true)) {
+            header('Location: /recuperar-senha', true, 301);
+            exit;
         }
 
         if ($path === 'recuperar-senha') {
@@ -52,6 +59,17 @@ final class Routes
                 header('Location: /login');
                 exit;
             }
+        }
+
+        if ($path === 'pdv') {
+            PdvController::fromGlobals()->indexAction();
+            return;
+        }
+
+        // Endereço do PDV antigo.
+        if ($path === 'pdv.php') {
+            header('Location: /pdv', true, 301);
+            exit;
         }
 
         if ($path === 'logs') {
