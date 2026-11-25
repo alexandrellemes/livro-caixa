@@ -14,7 +14,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-2 sidebar">
-            <h3>Livro Caixa</h3>
+            <h3>Livro Caixa <small class="sidebar-versao" title="Versão da aplicação">v<?= htmlspecialchars(\App\Support\Version::current()) ?></small></h3>
             <p class="text-muted">Usuário: <?= htmlspecialchars((string) ($_SESSION['auth']['user'] ?? 'visitante')) ?></p>
             <p class="text-muted">Perfil: <?= htmlspecialchars((string) ($_SESSION['auth']['role'] ?? 'viewer')) ?></p>
             <a href="/" class="<?= (($data['activeMenu'] ?? '') === 'dashboard') ? 'active' : '' ?>">Dashboard</a>

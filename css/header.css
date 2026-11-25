@@ -23,6 +23,11 @@ body {
     color: #fff;
 }
 
+.sidebar-versao {
+    color: #a7b1c2;
+    font-size: 12px;
+}
+
 .content {
     padding: 25px;
     background: #fff;

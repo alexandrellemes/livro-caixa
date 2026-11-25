@@ -6,6 +6,7 @@ use App\Models\ApiTokenRepository;
 use App\Models\PDOConnection;
 use App\Support\Logger;
 use App\Support\UserManager;
+use App\Support\Version;
 
 /**
  * Ponto de entrada da API REST (/api/v1/...).
@@ -172,6 +173,7 @@ final class ApiKernel
         return ['body' => ['data' => [
             'nome' => 'Livro Caixa API',
             'versao' => 'v1',
+            'versao_aplicacao' => Version::current(),
             'autenticacao' => 'POST /' . self::PREFIX . '/auth/token com {"username","password"}; depois envie "Authorization: Bearer <token>".',
             'rotas' => $rotas,
         ]]];

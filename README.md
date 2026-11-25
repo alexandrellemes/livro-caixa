@@ -56,6 +56,7 @@ Edite o arquivo `.env` na raiz do projeto:
 
 | Variável | Descrição |
 |---|---|
+| `APP_VERSAO` | Opcional: só é usada se o arquivo `VERSION` não existir |
 | `APP_ENV` | `development`, `testing` ou `production` (em `development` os erros são exibidos) |
 | `APP_URL` | URL pública da aplicação (usada nos links de recuperação de senha) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Conexão com o banco (`DB_HOST=app_db` no Docker) |
@@ -65,6 +66,10 @@ Edite o arquivo `.env` na raiz do projeto:
 | `SENDGRID_API_KEY`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Envio do e-mail de recuperação de senha |
 | `LOG_LEVEL` | Nível mínimo gravado nos logs: `debug`, `info`, `warning`, `error` ou `critical` (padrão: `debug` em development, `info` nos demais) |
 | `API_CORS_ORIGIN` | Opcional: origem liberada para chamar a API de um navegador (ex.: `https://app.exemplo.com`) |
+
+## Versão
+
+A versão exibida no menu lateral e em `GET /api/v1` vem do arquivo `VERSION` na raiz do projeto. Atualize-o a cada release.
 
 ## Acesso
 
