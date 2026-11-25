@@ -4,7 +4,7 @@ Livro Caixa é um sistema em PHP/MySQL para o controle mensal de caixa: categori
 
 Teve como ideia inicial o projeto Livro-Caixa de Felipe Ismael Barth ([fibbarth](https://github.com/fibbarth)).
 
-## Novidades da versão 2.0
+## Novidades da versão 2.1
 
 * **Nova estrutura MVC** (`app/`): roteador, controllers, services, repositórios PDO e views, com `public/` como raiz do servidor web.
 * **Interface renovada** com Bootstrap: dashboard mensal, listagens de categorias e movimentos com botões de Detalhes / Editar / Remover e valores formatados em reais (R$ 1.000,00).
