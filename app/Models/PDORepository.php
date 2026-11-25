@@ -99,15 +99,111 @@ final class PDORepository
 
     public function updateMovimento(int $id, array $data): bool
     {
-        $stmt = $this->connection->prepare('UPDATE movimentos SET dia = :dia, tipo = :tipo, categoria_id = :categoria_id, descricao = :descricao, valor = :valor WHERE id = :id');
-        return $stmt->execute([
+        $params = [
             ':dia' => $data['dia'],
             ':tipo' => $data['tipo'],
             ':categoria_id' => $data['categoria_id'],
             ':descricao' => $data['descricao'],
             ':valor' => $data['valor'],
             ':id' => $id,
-        ]);
+        ];
+
+        // Mês e ano só são alterados quando informados (o formulário antigo do dashboard envia só o dia).
+        $setData = '';
+        if (isset($data['mes'], $data['ano']) && $data['mes'] !== '' && $data['ano'] !== '') {
+            $setData = ', mes = :mes, ano = :ano';
+            $params[':mes'] = $data['mes'];
+            $params[':ano'] = $data['ano'];
+        }
+
+        $stmt = $this->connection->prepare("UPDATE movimentos SET dia = :dia, tipo = :tipo, categoria_id = :categoria_id, descricao = :descricao, valor = :valor{$setData} WHERE id = :id");
+        return $stmt->execute($params);
+    }
+
+    /**
+     * Busca paginada de movimentos com o nome da categoria.
+     *
+     * @param array{mes?:int, ano?:int, categoria_id?:int, tipo?:int, de?:string, ate?:string, busca?:string} $filtros
+     */
+    public function searchMovimentos(array $filtros, int $limit, int $offset): array
+    {
+        [$where, $params] = $this->movimentosWhere($filtros);
+
+        $stmt = $this->connection->prepare(
+            "SELECT m.*, c.nome AS categoria_nome
+             FROM movimentos m
+             LEFT JOIN categorias c ON c.id = m.categoria_id
+             {$where}
+             ORDER BY m.ano DESC, m.mes DESC, m.dia DESC, m.id DESC
+             LIMIT :limit OFFSET :offset"
+        );
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':limit', max(1, $limit), PDO::PARAM_INT);
+        $stmt->bindValue(':offset', max(0, $offset), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function countMovimentos(array $filtros): int
+    {
+        [$where, $params] = $this->movimentosWhere($filtros);
+
+        $stmt = $this->connection->prepare("SELECT COUNT(*) FROM movimentos m {$where}");
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function findMovimentoComCategoria(int $id): ?array
+    {
+        $stmt = $this->connection->prepare(
+            'SELECT m.*, c.nome AS categoria_nome FROM movimentos m LEFT JOIN categorias c ON c.id = m.categoria_id WHERE m.id = :id'
+        );
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
+    public function countMovimentosDaCategoria(int $categoriaId): int
+    {
+        $stmt = $this->connection->prepare('SELECT COUNT(*) FROM movimentos WHERE categoria_id = :id');
+        $stmt->execute([':id' => $categoriaId]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    private function movimentosWhere(array $filtros): array
+    {
+        $conditions = [];
+        $params = [];
+
+        foreach (['mes', 'ano', 'categoria_id', 'tipo'] as $campo) {
+            if (isset($filtros[$campo]) && $filtros[$campo] !== '') {
+                $conditions[] = "m.{$campo} = :{$campo}";
+                $params[":{$campo}"] = (int) $filtros[$campo];
+            }
+        }
+
+        // Datas no formato YYYY-MM-DD comparadas como número AAAAMMDD.
+        if (!empty($filtros['de'])) {
+            $conditions[] = '(m.ano * 10000 + m.mes * 100 + m.dia) >= :de';
+            $params[':de'] = (int) str_replace('-', '', $filtros['de']);
+        }
+        if (!empty($filtros['ate'])) {
+            $conditions[] = '(m.ano * 10000 + m.mes * 100 + m.dia) <= :ate';
+            $params[':ate'] = (int) str_replace('-', '', $filtros['ate']);
+        }
+
+        if (!empty($filtros['busca'])) {
+            $conditions[] = 'm.descricao LIKE :busca';
+            $params[':busca'] = '%' . $filtros['busca'] . '%';
+        }
+
+        return [$conditions === [] ? '' : 'WHERE ' . implode(' AND ', $conditions), $params];
     }
 
     public function deleteMovimento(int $id): bool

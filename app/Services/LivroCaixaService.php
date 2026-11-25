@@ -40,15 +40,16 @@ final class LivroCaixaService
         ];
     }
 
-    public function criarCategoria(string $nome): bool
+    /** Retorna o id da categoria criada (0 em caso de falha). */
+    public function criarCategoria(string $nome): int
     {
-        $ok = $this->repository->createCategoria($nome);
-        if ($ok) {
+        $id = 0;
+        if ($this->repository->createCategoria($nome)) {
             $id = (int) PDOConnection::getInstance()->lastInsertId();
             Logger::info('categoria.criar', "Categoria \"{$nome}\" criada.", ['depois' => ['nome' => $nome]], 'categoria', $id ?: null);
         }
 
-        return $ok;
+        return $id;
     }
 
     public function atualizarCategoria(int $id, string $nome): bool
@@ -82,17 +83,18 @@ final class LivroCaixaService
         return $ok;
     }
 
-    public function criarMovimento(array $dados): bool
+    /** Retorna o id do movimento criado (0 em caso de falha). */
+    public function criarMovimento(array $dados): int
     {
         $dados['valor'] = $this->normalizarValor($dados['valor'] ?? '0');
 
-        $ok = $this->repository->createMovimento($dados);
-        if ($ok) {
+        $id = 0;
+        if ($this->repository->createMovimento($dados)) {
             $id = (int) PDOConnection::getInstance()->lastInsertId();
             Logger::info('movimento.criar', "Movimento \"{$dados['descricao']}\" criado.", ['depois' => $dados], 'movimento', $id ?: null);
         }
 
-        return $ok;
+        return $id;
     }
 
     public function atualizarMovimento(int $id, array $dados): bool
@@ -143,6 +145,11 @@ final class LivroCaixaService
      * Aceita formato brasileiro ("R$ 1.234,56") e americano ("1,234.56"):
      * o último separador seguido de 1 ou 2 dígitos é o decimal; os demais são de milhar.
      */
+    public function repository(): PDORepository
+    {
+        return $this->repository;
+    }
+
     private function normalizarValor(string $valor): string
     {
         $valor = preg_replace('/[^\d,.\-]/', '', $valor) ?? '';

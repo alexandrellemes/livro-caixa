@@ -37,6 +37,7 @@ final class Logger
 
     private static ?LogRepository $repository = null;
     private static bool $writing = false;
+    private static ?string $usuario = null;
 
     public static function debug(string $acao, string $mensagem, array $contexto = [], ?string $entidade = null, int|string|null $entidadeId = null): void
     {
@@ -105,6 +106,12 @@ final class Logger
         }
     }
 
+    /** Define o usuário dos próximos registros (ex.: usuário do token na API, que não usa sessão). */
+    public static function setUser(?string $usuario): void
+    {
+        self::$usuario = $usuario;
+    }
+
     /** Permite injetar um repositório (testes) ou reiniciar a instância. */
     public static function setRepository(?LogRepository $repository): void
     {
@@ -136,6 +143,10 @@ final class Logger
 
     private static function currentUser(): ?string
     {
+        if (self::$usuario !== null) {
+            return self::$usuario;
+        }
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             return null;
         }

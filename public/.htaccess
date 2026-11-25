@@ -2,8 +2,9 @@ Options +FollowSymLinks -MultiViews
 
 RewriteEngine On
 
-#RewriteCond %{HTTP:Authorization} ^(.*)
-#RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+# Repassa o header Authorization ao PHP (tokens Bearer da API).
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

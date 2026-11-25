@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Api\ApiKernel;
 use App\Controllers\LivroCaixaController;
 use App\Controllers\LogController;
 use App\Support\Auth;
@@ -14,6 +15,12 @@ final class Routes
     {
         $path ??= parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
         $path = trim((string) $path, '/');
+
+        // API REST: autenticação própria por token, respostas em JSON.
+        if (ApiKernel::isApiPath($path)) {
+            ApiKernel::handle($path);
+            return;
+        }
 
         $controller = LivroCaixaController::fromGlobals();
 
