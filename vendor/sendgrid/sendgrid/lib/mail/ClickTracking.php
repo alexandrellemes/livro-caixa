@@ -1,18 +1,11 @@
 <?php
 /**
  * This helper builds the ClickTracking object for a /mail/send API call
- *
- * PHP Version - 5.6, 7.0, 7.1, 7.2
- *
- * @package   SendGrid\Mail
- * @author    Elmer Thomas <dx@sendgrid.com>
- * @copyright 2018-19 Twilio SendGrid
- * @license   https://opensource.org/licenses/MIT The MIT License
- * @version   GIT: <git_id>
- * @link      http://packagist.org/packages/sendgrid/sendgrid
  */
 
 namespace SendGrid\Mail;
+
+use SendGrid\Helper\Assert;
 
 /**
  * This class is used to construct a ClickTracking object for the /mail/send API call
@@ -26,15 +19,15 @@ class ClickTracking implements \JsonSerializable
     /* @var $enable_text bool Indicates if this setting should be included in the text/plain portion of your email */
     private $enable_text;
 
-	/**
-	 * Optional constructor
-	 *
-	 * @param bool|null $enable      Indicates if this setting is enabled
-	 * @param bool|null $enable_text Indicates if this setting should be
-	 *                               included in the text/plain portion of
-	 *                               your email
-	 * @throws \SendGrid\Mail\TypeException
-	 */
+    /**
+     * Optional constructor
+     *
+     * @param bool|null $enable      Indicates if this setting is enabled
+     * @param bool|null $enable_text Indicates if this setting should be
+     *                               included in the text/plain portion of
+     *                               your email
+     * @throws \SendGrid\Mail\TypeException
+     */
     public function __construct($enable = null, $enable_text = null)
     {
         if (isset($enable)) {
@@ -54,9 +47,8 @@ class ClickTracking implements \JsonSerializable
      */
     public function setEnable($enable)
     {
-        if (!is_bool($enable)) {
-            throw new TypeException('$enable must be of type bool.');
-        }
+        Assert::boolean($enable, 'enable');
+
         $this->enable = $enable;
     }
 
@@ -79,9 +71,8 @@ class ClickTracking implements \JsonSerializable
      */
     public function setEnableText($enable_text)
     {
-        if (!is_bool($enable_text)) {
-            throw new TypeException('$enable_text must be of type bool');
-        }
+        Assert::boolean($enable_text, 'enable_text');
+
         $this->enable_text = $enable_text;
     }
 
@@ -100,6 +91,7 @@ class ClickTracking implements \JsonSerializable
      *
      * @return null|array
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return array_filter(

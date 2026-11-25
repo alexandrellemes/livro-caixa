@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Translation\Dumper;
 
+use Symfony\Component\Translation\Exception\LogicException;
 use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Translation\Util\ArrayConverter;
 use Symfony\Component\Yaml\Yaml;
@@ -22,13 +23,15 @@ use Symfony\Component\Yaml\Yaml;
  */
 class YamlFileDumper extends FileDumper
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function formatCatalogue(MessageCatalogue $messages, $domain, array $options = array())
+    public function __construct(
+        private string $extension = 'yml',
+    ) {
+    }
+
+    public function formatCatalogue(MessageCatalogue $messages, string $domain, array $options = []): string
     {
-        if (!class_exists('Symfony\Component\Yaml\Yaml')) {
-            throw new \LogicException('Dumping translations in the YAML format requires the Symfony Yaml component.');
+        if (!class_exists(Yaml::class)) {
+            throw new LogicException('Dumping translations in the YAML format requires the Symfony Yaml component.');
         }
 
         $data = $messages->all($domain);
@@ -44,21 +47,8 @@ class YamlFileDumper extends FileDumper
         return Yaml::dump($data);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function format(MessageCatalogue $messages, $domain)
+    protected function getExtension(): string
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.8 and will be removed in 3.0. Use the formatCatalogue() method instead.', E_USER_DEPRECATED);
-
-        return $this->formatCatalogue($messages, $domain);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getExtension()
-    {
-        return 'yml';
+        return $this->extension;
     }
 }

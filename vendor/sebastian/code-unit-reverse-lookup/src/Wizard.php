@@ -1,42 +1,48 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * This file is part of code-unit-reverse-lookup.
+ * This file is part of sebastian/code-unit-reverse-lookup.
  *
  * (c) Sebastian Bergmann <sebastian@phpunit.de>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace SebastianBergmann\CodeUnitReverseLookup;
 
-/**
- * @since Class available since Release 1.0.0
- */
-class Wizard
+use function array_merge;
+use function assert;
+use function class_exists;
+use function function_exists;
+use function get_declared_classes;
+use function get_declared_traits;
+use function get_defined_functions;
+use function is_array;
+use function is_int;
+use function is_string;
+use function range;
+use function trait_exists;
+use ReflectionClass;
+use ReflectionFunction;
+use ReflectionMethod;
+
+final class Wizard
 {
     /**
-     * @var array
+     * @var array<string, array<int, string>>
      */
-    private $lookupTable = [];
+    private array $lookupTable = [];
 
     /**
-     * @var array
+     * @var array<class-string, true>
      */
-    private $processedClasses = [];
+    private array $processedClasses = [];
 
     /**
-     * @var array
+     * @var array<string, true>
      */
-    private $processedFunctions = [];
+    private array $processedFunctions = [];
 
-    /**
-     * @param string $filename
-     * @param int    $lineNumber
-     *
-     * @return string
-     */
-    public function lookup($filename, $lineNumber)
+    public function lookup(string $filename, int $lineNumber): string
     {
         if (!isset($this->lookupTable[$filename][$lineNumber])) {
             $this->updateLookupTable();
@@ -44,27 +50,32 @@ class Wizard
 
         if (isset($this->lookupTable[$filename][$lineNumber])) {
             return $this->lookupTable[$filename][$lineNumber];
-        } else {
-            return $filename . ':' . $lineNumber;
         }
+
+        return $filename . ':' . $lineNumber;
     }
 
-    private function updateLookupTable()
+    private function updateLookupTable(): void
     {
         $this->processClassesAndTraits();
         $this->processFunctions();
     }
 
-    private function processClassesAndTraits()
+    private function processClassesAndTraits(): void
     {
-        foreach (array_merge(get_declared_classes(), get_declared_traits()) as $classOrTrait) {
+        $classes = get_declared_classes();
+        $traits  = get_declared_traits();
+
+        assert(is_array($traits));
+
+        foreach (array_merge($classes, $traits) as $classOrTrait) {
+            assert(class_exists($classOrTrait) || trait_exists($classOrTrait));
+
             if (isset($this->processedClasses[$classOrTrait])) {
                 continue;
             }
 
-            $reflector = new \ReflectionClass($classOrTrait);
-
-            foreach ($reflector->getMethods() as $method) {
+            foreach ((new ReflectionClass($classOrTrait))->getMethods() as $method) {
                 $this->processFunctionOrMethod($method);
             }
 
@@ -72,23 +83,22 @@ class Wizard
         }
     }
 
-    private function processFunctions()
+    private function processFunctions(): void
     {
         foreach (get_defined_functions()['user'] as $function) {
+            assert(function_exists($function));
+
             if (isset($this->processedFunctions[$function])) {
                 continue;
             }
 
-            $this->processFunctionOrMethod(new \ReflectionFunction($function));
+            $this->processFunctionOrMethod(new ReflectionFunction($function));
 
             $this->processedFunctions[$function] = true;
         }
     }
 
-    /**
-     * @param \ReflectionFunctionAbstract $functionOrMethod
-     */
-    private function processFunctionOrMethod(\ReflectionFunctionAbstract $functionOrMethod)
+    private function processFunctionOrMethod(ReflectionFunction|ReflectionMethod $functionOrMethod): void
     {
         if ($functionOrMethod->isInternal()) {
             return;
@@ -96,16 +106,27 @@ class Wizard
 
         $name = $functionOrMethod->getName();
 
-        if ($functionOrMethod instanceof \ReflectionMethod) {
+        if ($functionOrMethod instanceof ReflectionMethod) {
             $name = $functionOrMethod->getDeclaringClass()->getName() . '::' . $name;
         }
 
-        if (!isset($this->lookupTable[$functionOrMethod->getFileName()])) {
-            $this->lookupTable[$functionOrMethod->getFileName()] = [];
+        $fileName = $functionOrMethod->getFileName();
+
+        assert(is_string($fileName));
+
+        if (!isset($this->lookupTable[$fileName])) {
+            $this->lookupTable[$fileName] = [];
         }
 
-        foreach (range($functionOrMethod->getStartLine(), $functionOrMethod->getEndLine()) as $line) {
-            $this->lookupTable[$functionOrMethod->getFileName()][$line] = $name;
+        $startLine = $functionOrMethod->getStartLine();
+        $endLine   = $functionOrMethod->getEndLine();
+
+        assert(is_int($startLine));
+        assert(is_int($endLine));
+        assert($endLine >= $startLine);
+
+        foreach (range($startLine, $endLine) as $line) {
+            $this->lookupTable[$fileName][$line] = $name;
         }
     }
 }

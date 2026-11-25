@@ -12,8 +12,11 @@
 namespace Symfony\Component\Config\Loader;
 
 use Symfony\Component\Config\Exception\FileLoaderImportCircularReferenceException;
-use Symfony\Component\Config\Exception\FileLoaderLoadException;
+use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
+use Symfony\Component\Config\Exception\LoaderLoadException;
 use Symfony\Component\Config\FileLocatorInterface;
+use Symfony\Component\Config\Resource\FileExistenceResource;
+use Symfony\Component\Config\Resource\GlobResource;
 
 /**
  * FileLoader is the abstract class used by all built-in loaders that are file based.
@@ -22,33 +25,29 @@ use Symfony\Component\Config\FileLocatorInterface;
  */
 abstract class FileLoader extends Loader
 {
-    protected static $loading = array();
+    protected static array $loading = [];
 
-    protected $locator;
+    private ?string $currentDir = null;
 
-    private $currentDir;
-
-    public function __construct(FileLocatorInterface $locator)
-    {
-        $this->locator = $locator;
+    public function __construct(
+        protected FileLocatorInterface $locator,
+        ?string $env = null,
+    ) {
+        parent::__construct($env);
     }
 
     /**
      * Sets the current directory.
-     *
-     * @param string $dir
      */
-    public function setCurrentDir($dir)
+    public function setCurrentDir(string $dir): void
     {
         $this->currentDir = $dir;
     }
 
     /**
      * Returns the file locator used by this loader.
-     *
-     * @return FileLocatorInterface
      */
-    public function getLocator()
+    public function getLocator(): FileLocatorInterface
     {
         return $this->locator;
     }
@@ -56,35 +55,110 @@ abstract class FileLoader extends Loader
     /**
      * Imports a resource.
      *
-     * @param mixed       $resource       A Resource
-     * @param string|null $type           The resource type or null if unknown
-     * @param bool        $ignoreErrors   Whether to ignore import errors or not
-     * @param string|null $sourceResource The original resource importing the new resource
+     * @param mixed                $resource       A Resource
+     * @param string|null          $type           The resource type or null if unknown
+     * @param bool                 $ignoreErrors   Whether to ignore import errors or not
+     * @param string|null          $sourceResource The original resource importing the new resource
+     * @param string|string[]|null $exclude        Glob patterns to exclude from the import
      *
-     * @return mixed
-     *
-     * @throws FileLoaderLoadException
+     * @throws LoaderLoadException
      * @throws FileLoaderImportCircularReferenceException
+     * @throws FileLocatorFileNotFoundException
      */
-    public function import($resource, $type = null, $ignoreErrors = false, $sourceResource = null)
+    public function import(mixed $resource, ?string $type = null, bool $ignoreErrors = false, ?string $sourceResource = null, string|array|null $exclude = null): mixed
+    {
+        $excluded = [];
+        foreach ((array) $exclude as $pattern) {
+            foreach ($this->glob($pattern, true, $_, false, true) as $path => $info) {
+                // normalize Windows slashes and remove trailing slashes
+                $excluded[rtrim(str_replace('\\', '/', $path), '/')] = true;
+            }
+        }
+
+        if (\is_string($resource) && !class_exists($resource)) {
+            $isGlobPattern = \strlen($resource) !== strcspn($resource, '*?{[');
+
+            if (!$isGlobPattern && $excluded) {
+                $resource = rtrim(str_replace('\\', '/', $resource), '/');
+                $resource .= '/**/*';
+                $isGlobPattern = true;
+            }
+
+            if ($isGlobPattern && !str_contains($resource, "\n")) {
+                $ret = [];
+                $i = strcspn($resource, '*?{[');
+                $isSubpath = 0 !== $i && str_contains(substr($resource, 0, $i), '/');
+                foreach ($this->glob($resource, false, $_, $ignoreErrors || !$isSubpath, false, $excluded) as $path => $info) {
+                    if (null !== $res = $this->doImport($path, 'glob' === $type ? null : $type, $ignoreErrors, $sourceResource)) {
+                        $ret[] = $res;
+                    }
+                    $isSubpath = true;
+                }
+
+                if ($isSubpath) {
+                    return isset($ret[1]) ? $ret : ($ret[0] ?? null);
+                }
+            }
+        } elseif (\is_array($resource) && $excluded) {
+            $resource['_excluded'] = $excluded;
+        }
+
+        return $this->doImport($resource, $type, $ignoreErrors, $sourceResource);
+    }
+
+    /**
+     * @internal
+     */
+    protected function glob(string $pattern, bool $recursive, array|GlobResource|null &$resource = null, bool $ignoreErrors = false, bool $forExclusion = false, array $excluded = []): iterable
+    {
+        if (\strlen($pattern) === $i = strcspn($pattern, '*?{[')) {
+            $prefix = $pattern;
+            $pattern = '';
+        } elseif (0 === $i || !str_contains(substr($pattern, 0, $i), '/')) {
+            $prefix = '.';
+            $pattern = '/'.$pattern;
+        } else {
+            $prefix = \dirname(substr($pattern, 0, 1 + $i));
+            $pattern = substr($pattern, \strlen($prefix));
+        }
+
+        try {
+            $prefix = $this->locator->locate($prefix, $this->currentDir, true);
+        } catch (FileLocatorFileNotFoundException $e) {
+            if (!$ignoreErrors) {
+                throw $e;
+            }
+
+            $resource = [];
+            foreach ($e->getPaths() as $path) {
+                $resource[] = new FileExistenceResource($path);
+            }
+
+            return;
+        }
+        $resource = new GlobResource($prefix, $pattern, $recursive, $forExclusion, $excluded);
+
+        yield from $resource;
+    }
+
+    private function doImport(mixed $resource, ?string $type = null, bool $ignoreErrors = false, ?string $sourceResource = null): mixed
     {
         try {
             $loader = $this->resolve($resource, $type);
 
-            if ($loader instanceof self && null !== $this->currentDir) {
-                // we fallback to the current locator to keep BC
-                // as some some loaders do not call the parent __construct()
-                // @deprecated should be removed in 3.0
-                $locator = $loader->getLocator();
-                if (null === $locator) {
-                    @trigger_error('Not calling the parent constructor in '.\get_class($loader).' which extends '.__CLASS__.' is deprecated since Symfony 2.7 and will not be supported anymore in 3.0.', E_USER_DEPRECATED);
-                    $locator = $this->locator;
-                }
-
-                $resource = $locator->locate($resource, $this->currentDir, false);
+            if ($loader instanceof DirectoryAwareLoaderInterface) {
+                $loader = $loader->forDirectory($this->currentDir);
             }
 
-            $resources = \is_array($resource) ? $resource : array($resource);
+            if (!$loader instanceof self) {
+                return $loader->load($resource, $type);
+            }
+
+            if (null !== $this->currentDir) {
+                $resource = $loader->getLocator()->locate($resource, $this->currentDir, false);
+            }
+
+            $resources = \is_array($resource) ? $resource : [$resource];
             for ($i = 0; $i < $resourcesCount = \count($resources); ++$i) {
                 if (isset(self::$loading[$resources[$i]])) {
                     if ($i == $resourcesCount - 1) {
@@ -99,15 +173,9 @@ abstract class FileLoader extends Loader
 
             try {
                 $ret = $loader->load($resource, $type);
-            } catch (\Exception $e) {
+            } finally {
                 unset(self::$loading[$resource]);
-                throw $e;
-            } catch (\Throwable $e) {
-                unset(self::$loading[$resource]);
-                throw $e;
             }
-
-            unset(self::$loading[$resource]);
 
             return $ret;
         } catch (FileLoaderImportCircularReferenceException $e) {
@@ -115,12 +183,14 @@ abstract class FileLoader extends Loader
         } catch (\Exception $e) {
             if (!$ignoreErrors) {
                 // prevent embedded imports from nesting multiple exceptions
-                if ($e instanceof FileLoaderLoadException) {
+                if ($e instanceof LoaderLoadException) {
                     throw $e;
                 }
 
-                throw new FileLoaderLoadException($resource, $sourceResource, null, $e);
+                throw new LoaderLoadException($resource, $sourceResource, 0, $e, $type);
             }
         }
+
+        return null;
     }
 }

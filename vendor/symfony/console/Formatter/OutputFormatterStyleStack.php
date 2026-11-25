@@ -12,37 +12,38 @@
 namespace Symfony\Component\Console\Formatter;
 
 use Symfony\Component\Console\Exception\InvalidArgumentException;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * @author Jean-François Simon <contact@jfsimon.fr>
  */
-class OutputFormatterStyleStack
+class OutputFormatterStyleStack implements ResetInterface
 {
     /**
      * @var OutputFormatterStyleInterface[]
      */
-    private $styles;
+    private array $styles = [];
 
-    private $emptyStyle;
+    private OutputFormatterStyleInterface $emptyStyle;
 
-    public function __construct(OutputFormatterStyleInterface $emptyStyle = null)
+    public function __construct(?OutputFormatterStyleInterface $emptyStyle = null)
     {
-        $this->emptyStyle = $emptyStyle ?: new OutputFormatterStyle();
+        $this->emptyStyle = $emptyStyle ?? new OutputFormatterStyle();
         $this->reset();
     }
 
     /**
      * Resets stack (ie. empty internal arrays).
      */
-    public function reset()
+    public function reset(): void
     {
-        $this->styles = array();
+        $this->styles = [];
     }
 
     /**
      * Pushes a style in the stack.
      */
-    public function push(OutputFormatterStyleInterface $style)
+    public function push(OutputFormatterStyleInterface $style): void
     {
         $this->styles[] = $style;
     }
@@ -50,13 +51,11 @@ class OutputFormatterStyleStack
     /**
      * Pops a style from the stack.
      *
-     * @return OutputFormatterStyleInterface
-     *
      * @throws InvalidArgumentException When style tags incorrectly nested
      */
-    public function pop(OutputFormatterStyleInterface $style = null)
+    public function pop(?OutputFormatterStyleInterface $style = null): OutputFormatterStyleInterface
     {
-        if (empty($this->styles)) {
+        if (!$this->styles) {
             return $this->emptyStyle;
         }
 
@@ -77,12 +76,10 @@ class OutputFormatterStyleStack
 
     /**
      * Computes current style with stacks top codes.
-     *
-     * @return OutputFormatterStyle
      */
-    public function getCurrent()
+    public function getCurrent(): OutputFormatterStyleInterface
     {
-        if (empty($this->styles)) {
+        if (!$this->styles) {
             return $this->emptyStyle;
         }
 
@@ -92,17 +89,14 @@ class OutputFormatterStyleStack
     /**
      * @return $this
      */
-    public function setEmptyStyle(OutputFormatterStyleInterface $emptyStyle)
+    public function setEmptyStyle(OutputFormatterStyleInterface $emptyStyle): static
     {
         $this->emptyStyle = $emptyStyle;
 
         return $this;
     }
 
-    /**
-     * @return OutputFormatterStyleInterface
-     */
-    public function getEmptyStyle()
+    public function getEmptyStyle(): OutputFormatterStyleInterface
     {
         return $this->emptyStyle;
     }

@@ -1,14 +1,16 @@
-# Text_Template
+[![Latest Stable Version](https://poser.pugx.org/phpunit/php-text-template/v/stable.png)](https://packagist.org/packages/phpunit/php-text-template)
+[![CI Status](https://github.com/sebastianbergmann/php-text-template/workflows/CI/badge.svg)](https://github.com/sebastianbergmann/php-text-template/actions)
+[![codecov](https://codecov.io/gh/sebastianbergmann/php-text-template/branch/main/graph/badge.svg)](https://codecov.io/gh/sebastianbergmann/php-text-template)
+
+# php-text-template
 
 ## Installation
 
-## Installation
+You can add this library as a local, per-project dependency to your project using [Composer](https://getcomposer.org/):
 
-To add this package as a local, per-project dependency to your project, simply add a dependency on `phpunit/php-text-template` to your project's `composer.json` file. Here is a minimal example of a `composer.json` file that just defines a dependency on Text_Template:
+    composer require phpunit/php-text-template
 
-    {
-        "require": {
-            "phpunit/php-text-template": "~1.2"
-        }
-    }
+If you only need this library during development, for instance to run your project's test suite, then you should add it as a development-time dependency:
+
+    composer require --dev phpunit/php-text-template
 

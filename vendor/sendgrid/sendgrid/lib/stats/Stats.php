@@ -1,17 +1,11 @@
 <?php
 /**
  * This helper retrieves stats from a /mail/send API call
- *
- * PHP Version - 5.6, 7.0, 7.1, 7.2
- *
- * @package   SendGrid\Mail
- * @author    Elmer Thomas <dx@sendgrid.com>
- * @copyright 2018-19 Twilio SendGrid
- * @license   https://opensource.org/licenses/MIT The MIT License
- * @version   GIT: <git_id>
- * @link      http://packagist.org/packages/sendgrid/sendgrid
  */
 namespace SendGrid\Stats;
+
+use DateTime;
+use Exception;
 
 /**
  * This class is used to retrieve stats from a /mail/send API call
@@ -20,27 +14,30 @@ namespace SendGrid\Stats;
  */
 class Stats
 {
+    /** @var string Expected date format */
     const DATE_FORMAT = 'Y-m-d';
+    /** @var string[] Available sort options */
     const OPTIONS_SORT_DIRECTION = ['asc', 'desc'];
+    /** @var string[] Available aggregate options */
     const OPTIONS_AGGREGATED_BY = ['day', 'week', 'month'];
 
-    // @var string
+    /** @var string Starting date */
     private $startDate;
 
-    // @var string
+    /** @var string|null End date (optional) */
     private $endDate;
 
-    // @var string
+    /** @var string|null Desired aggregate option (optional) */
     private $aggregatedBy;
 
-	/**
-	 * Stats constructor
-	 *
-	 * @param string $startDate    YYYYMMDD
-	 * @param string $endDate      YYYYMMDD
-	 * @param string $aggregatedBy day|week|month
-	 * @throws \Exception
-	 */
+    /**
+     * Stats constructor
+     *
+     * @param string $startDate    YYYY-MM-DD
+     * @param string $endDate      YYYY-MM-DD
+     * @param string $aggregatedBy day|week|month
+     * @throws Exception
+     */
     public function __construct($startDate, $endDate = null, $aggregatedBy = null)
     {
         $this->validateDateFormat($startDate);
@@ -80,7 +77,7 @@ class Stats
      * @param array $categories
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getCategory($categories)
     {
@@ -97,7 +94,7 @@ class Stats
      * @param array $subusers Subuser accounts
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSubuser($subusers)
     {
@@ -118,19 +115,20 @@ class Stats
      *                                 requests|spam_report_drops|
      *                                 spam_reports|unique_clicks|
      *                                 unique_opens|unsubscribe_drops|
-     *                                 unsubsribes
+     *                                 unsubscribes
      * @param string  $sortByDirection asc|desc
      * @param integer $limit           The number of results to return
      * @param integer $offset          The point in the list to begin
      *                                 retrieving results
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSum(
         $sortByMetric = 'delivered',
         $sortByDirection = 'desc',
-        $limit = 5, $offset = 0
+        $limit = 5,
+        $offset = 0
     ) {
         $this->validateOptions(
             'sortByDirection',
@@ -157,14 +155,14 @@ class Stats
      *                                 requests|spam_report_drops|
      *                                 spam_reports|unique_clicks|
      *                                 unique_opens|unsubscribe_drops|
-     *                                 unsubsribes
+     *                                 unsubscribes
      * @param string  $sortByDirection asc|desc
      * @param integer $limit           The number of results to return
      * @param integer $offset          The point in the list to begin
      *                                 retrieving results
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getSubuserMonthly(
         $subuser = null,
@@ -195,13 +193,12 @@ class Stats
      *
      * @param string $date YYYY-MM-DD
      *
-     * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     protected function validateDateFormat($date)
     {
-        if (false === \DateTime::createFromFormat(self::DATE_FORMAT, $date)) {
-            throw new \Exception('Date must be in the YYYY-MM-DD format.');
+        if (false === DateTime::createFromFormat(self::DATE_FORMAT, $date)) {
+            throw new Exception('Date must be in the YYYY-MM-DD format.');
         }
     }
 
@@ -212,13 +209,12 @@ class Stats
      * @param string $value   Value of option
      * @param array  $options Array of options
      *
-     * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     protected function validateOptions($name, $value, $options)
     {
         if (!in_array($value, $options)) {
-            throw new \Exception(
+            throw new Exception(
                 $name . ' must be one of: ' . implode(', ', $options)
             );
         }
@@ -230,13 +226,12 @@ class Stats
      * @param string  $name  Name as a string
      * @param integer $value Value as an integer
      *
-     * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     protected function validateInteger($name, $value)
     {
         if (!is_integer($value)) {
-            throw new \Exception($name . ' must be an integer.');
+            throw new Exception($name . ' must be an integer.');
         }
     }
 
@@ -246,13 +241,12 @@ class Stats
      * @param string $name  Name as a string
      * @param array  $value Value as an array of integers
      *
-     * @return null
-     * @throws \Exception
+     * @throws Exception
      */
     protected function validateNumericArray($name, $value)
     {
-        if (!is_array($value) || empty($value) || !$this->isNumeric($value)) {
-            throw new \Exception($name . ' must be a non-empty numeric array.');
+        if (!\is_array($value) || empty($value) || !$this->isNumeric($value)) {
+            throw new Exception($name . ' must be a non-empty numeric array.');
         }
     }
 
@@ -265,6 +259,6 @@ class Stats
      */
     protected function isNumeric(array $array)
     {
-        return array_keys($array) === range(0, count($array) - 1);
+        return \array_keys($array) === range(0, \count($array) - 1);
     }
 }

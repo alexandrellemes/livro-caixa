@@ -1,7 +1,7 @@
 {
     "name": "symfony/dependency-injection",
     "type": "library",
-    "description": "Symfony DependencyInjection Component",
+    "description": "Allows you to standardize and centralize the way objects are constructed in your application",
     "keywords": [],
     "homepage": "https://symfony.com",
     "license": "MIT",
@@ -16,21 +16,26 @@
         }
     ],
     "require": {
-        "php": ">=5.3.9"
+        "php": ">=8.2",
+        "psr/container": "^1.1|^2.0",
+        "symfony/deprecation-contracts": "^2.5|^3",
+        "symfony/service-contracts": "^3.6",
+        "symfony/var-exporter": "^6.4.20|^7.2.5|^8.0"
     },
     "require-dev": {
-        "symfony/yaml": "~2.3.42|~2.7.14|~2.8.7|~3.0.7",
-        "symfony/config": "~2.2|~3.0.0",
-        "symfony/expression-language": "~2.6|~3.0.0"
+        "symfony/yaml": "^6.4|^7.0|^8.0",
+        "symfony/config": "^6.4|^7.0|^8.0",
+        "symfony/expression-language": "^6.4|^7.0|^8.0"
     },
     "conflict": {
-        "symfony/expression-language": "<2.6"
+        "ext-psr": "<1.1|>=2",
+        "symfony/config": "<6.4",
+        "symfony/finder": "<6.4",
+        "symfony/yaml": "<6.4"
     },
-    "suggest": {
-        "symfony/yaml": "",
-        "symfony/config": "",
-        "symfony/expression-language": "For using expressions in service container configuration",
-        "symfony/proxy-manager-bridge": "Generate service proxies to lazy load them"
+    "provide": {
+        "psr/container-implementation": "1.1|2.0",
+        "symfony/service-implementation": "1.1|2.0|3.0"
     },
     "autoload": {
         "psr-4": { "Symfony\\Component\\DependencyInjection\\": "" },
@@ -38,10 +43,5 @@
             "/Tests/"
         ]
     },
-    "minimum-stability": "dev",
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.8-dev"
-        }
-    }
+    "minimum-stability": "dev"
 }

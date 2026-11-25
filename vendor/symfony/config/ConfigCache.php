@@ -11,8 +11,9 @@
 
 namespace Symfony\Component\Config;
 
-use Symfony\Component\Config\Resource\BCResourceInterfaceChecker;
+use Symfony\Component\Config\Resource\ResourceInterface;
 use Symfony\Component\Config\Resource\SelfCheckingResourceChecker;
+use Symfony\Component\Config\Resource\SkippingResourceChecker;
 
 /**
  * ConfigCache caches arbitrary content in files on disk.
@@ -21,43 +22,32 @@ use Symfony\Component\Config\Resource\SelfCheckingResourceChecker;
  * \Symfony\Component\Config\Resource\SelfCheckingResourceInterface will
  * be used to check cache freshness.
  *
- * During a transition period, also instances of
- * \Symfony\Component\Config\Resource\ResourceInterface will be checked
- * by means of the isFresh() method. This behaviour is deprecated since 2.8
- * and will be removed in 3.0.
- *
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Matthias Pigulla <mp@webfactory.de>
  */
 class ConfigCache extends ResourceCheckerConfigCache
 {
-    private $debug;
-
     /**
-     * @param string $file  The absolute cache path
-     * @param bool   $debug Whether debugging is enabled or not
+     * @param string                                 $file                 The absolute cache path
+     * @param bool                                   $debug                Whether debugging is enabled or not
+     * @param string|null                            $metaFile             The absolute path to the meta file
+     * @param class-string<ResourceInterface>[]|null $skippedResourceTypes
      */
-    public function __construct($file, $debug)
-    {
-        parent::__construct($file, array(
-            new SelfCheckingResourceChecker(),
-            new BCResourceInterfaceChecker(),
-        ));
-        $this->debug = (bool) $debug;
-    }
+    public function __construct(
+        string $file,
+        private bool $debug,
+        ?string $metaFile = null,
+        ?array $skippedResourceTypes = null,
+    ) {
+        $checkers = [];
+        if ($this->debug) {
+            if (null !== $skippedResourceTypes) {
+                $checkers[] = new SkippingResourceChecker($skippedResourceTypes);
+            }
+            $checkers[] = new SelfCheckingResourceChecker();
+        }
 
-    /**
-     * Gets the cache file path.
-     *
-     * @return string The cache file path
-     *
-     * @deprecated since 2.7, to be removed in 3.0. Use getPath() instead.
-     */
-    public function __toString()
-    {
-        @trigger_error('ConfigCache::__toString() is deprecated since Symfony 2.7 and will be removed in 3.0. Use the getPath() method instead.', E_USER_DEPRECATED);
-
-        return $this->getPath();
+        parent::__construct($file, $checkers, $metaFile);
     }
 
     /**
@@ -65,10 +55,8 @@ class ConfigCache extends ResourceCheckerConfigCache
      *
      * This implementation always returns true when debug is off and the
      * cache file exists.
-     *
-     * @return bool true if the cache is fresh, false otherwise
      */
-    public function isFresh()
+    public function isFresh(): bool
     {
         if (!$this->debug && is_file($this->getPath())) {
             return true;

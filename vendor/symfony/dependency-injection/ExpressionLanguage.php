@@ -11,8 +11,12 @@
 
 namespace Symfony\Component\DependencyInjection;
 
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage as BaseExpressionLanguage;
-use Symfony\Component\ExpressionLanguage\ParserCache\ParserCacheInterface;
+
+if (!class_exists(BaseExpressionLanguage::class)) {
+    return;
+}
 
 /**
  * Adds some function to the default ExpressionLanguage.
@@ -23,10 +27,14 @@ use Symfony\Component\ExpressionLanguage\ParserCache\ParserCacheInterface;
  */
 class ExpressionLanguage extends BaseExpressionLanguage
 {
-    public function __construct(ParserCacheInterface $cache = null, array $providers = array())
+    public function __construct(?CacheItemPoolInterface $cache = null, iterable $providers = [], ?callable $serviceCompiler = null, ?\Closure $getEnv = null)
     {
+        if (!\is_array($providers)) {
+            $providers = iterator_to_array($providers, false);
+        }
+
         // prepend the default provider to let users override it easily
-        array_unshift($providers, new ExpressionLanguageProvider());
+        array_unshift($providers, new ExpressionLanguageProvider($serviceCompiler, $getEnv));
 
         parent::__construct($cache, $providers);
     }

@@ -1,0 +1,60 @@
+
+services:
+
+  # Servidor Web: PHP 8.2 + Apache
+  web:
+    container_name: app_web
+    hostname: app-web.local
+    build: docker
+    ports:
+      - 8080:80
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysqldb
+    restart: always
+    networks:
+      - code-network
+
+  # Banco de Dados: MariaDB
+  mysqldb:
+    container_name: app_db
+    hostname: app-db.local
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 3306:3306
+    volumes:
+      - mysqldb_data:/var/lib/mysql
+    restart: always
+    networks:
+      - code-network
+
+#  phpmyadmin:
+#    container_name: phpmyadmin
+#    hostname: phpmyadmin.local
+#    image: phpmyadmin/phpmyadmin:latest
+#    ports:
+#      - 8000:80
+#    restart: always
+#    links:
+#      - mysqldb
+#    environment:
+#      MYSQL_USERNAME: root
+#      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+#      PMA_HOST: app_db
+#    networks:
+#      - code-network
+
+volumes:
+  web_data:
+  mysqldb_data:
+  phpmyadmin_data:
+
+networks:
+  code-network:
+    driver: bridge

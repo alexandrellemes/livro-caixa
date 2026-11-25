@@ -1,48 +1,44 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * This file is part of the php-code-coverage package.
+ * This file is part of phpunit/php-code-coverage.
  *
  * (c) Sebastian Bergmann <sebastian@phpunit.de>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace SebastianBergmann\CodeCoverage\Report\Xml;
 
-use SebastianBergmann\CodeCoverage\RuntimeException;
+use DOMElement;
+use SebastianBergmann\CodeCoverage\ReportAlreadyFinalizedException;
+use XMLWriter;
 
-class Coverage
+/**
+ * @internal This class is not covered by the backward compatibility promise for phpunit/php-code-coverage
+ */
+final class Coverage
 {
-    /**
-     * @var \XMLWriter
-     */
-    private $writer;
+    private readonly XMLWriter $writer;
+    private readonly DOMElement $contextNode;
+    private bool $finalized = false;
 
-    /**
-     * @var \DOMElement
-     */
-    private $contextNode;
-
-    /**
-     * @var bool
-     */
-    private $finalized = false;
-
-    public function __construct(\DOMElement $context, $line)
+    public function __construct(DOMElement $context, string $line)
     {
         $this->contextNode = $context;
 
-        $this->writer = new \XMLWriter();
+        $this->writer = new XMLWriter;
         $this->writer->openMemory();
-        $this->writer->startElementNs(null, $context->nodeName, 'http://schema.phpunit.de/coverage/1.0');
+        $this->writer->startElementNS(null, $context->nodeName, 'https://schema.phpunit.de/coverage/1.0');
         $this->writer->writeAttribute('nr', $line);
     }
 
-    public function addTest($test)
+    /**
+     * @throws ReportAlreadyFinalizedException
+     */
+    public function addTest(string $test): void
     {
         if ($this->finalized) {
-            throw new RuntimeException('Coverage Report already finalized');
+            throw new ReportAlreadyFinalizedException;
         }
 
         $this->writer->startElement('covered');
@@ -50,7 +46,7 @@ class Coverage
         $this->writer->endElement();
     }
 
-    public function finalize()
+    public function finalize(): void
     {
         $this->writer->endElement();
 
@@ -59,7 +55,7 @@ class Coverage
 
         $this->contextNode->parentNode->replaceChild(
             $fragment,
-            $this->contextNode
+            $this->contextNode,
         );
 
         $this->finalized = true;

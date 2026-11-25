@@ -1,18 +1,11 @@
 <?php
 /**
  * This helper builds the BccSettings object for a /mail/send API call
- *
- * PHP Version - 5.6, 7.0, 7.1, 7.2
- *
- * @package   SendGrid\Mail
- * @author    Elmer Thomas <dx@sendgrid.com>
- * @copyright 2018-19 Twilio SendGrid
- * @license   https://opensource.org/licenses/MIT The MIT License
- * @version   GIT: <git_id>
- * @link      http://packagist.org/packages/sendgrid/sendgrid
  */
 
 namespace SendGrid\Mail;
+
+use SendGrid\Helper\Assert;
 
 /**
  * This class is used to construct a BccSettings object for the /mail/send API call
@@ -26,14 +19,14 @@ class BccSettings implements \JsonSerializable
     /** @var $email string The email address that you would like to receive the BCC */
     private $email;
 
-	/**
-	 * Optional constructor
-	 *
-	 * @param bool|null   $enable Indicates if this setting is enabled
-	 * @param string|null $email  The email address that you would like
-	 *                            to receive the BCC
-	 * @throws \SendGrid\Mail\TypeException
-	 */
+    /**
+     * Optional constructor
+     *
+     * @param bool|null   $enable Indicates if this setting is enabled
+     * @param string|null $email  The email address that you would like
+     *                            to receive the BCC
+     * @throws \SendGrid\Mail\TypeException
+     */
     public function __construct($enable = null, $email = null)
     {
         if (isset($enable)) {
@@ -53,9 +46,8 @@ class BccSettings implements \JsonSerializable
      */
     public function setEnable($enable)
     {
-        if (!is_bool($enable)) {
-            throw new TypeException('$enable must be of type bool.');
-        }
+        Assert::boolean($enable, 'enable');
+
         $this->enable = $enable;
     }
 
@@ -79,13 +71,8 @@ class BccSettings implements \JsonSerializable
      */
     public function setEmail($email)
     {
-        if (!is_string($email) &&
-            filter_var($email, FILTER_VALIDATE_EMAIL)
-        ) {
-            throw new TypeException(
-                '$email must valid and be of type string.'
-            );
-        }
+        Assert::email($email, 'email');
+
         $this->email = $email;
     }
 
@@ -104,6 +91,7 @@ class BccSettings implements \JsonSerializable
      *
      * @return null|array
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return array_filter(
@@ -111,7 +99,7 @@ class BccSettings implements \JsonSerializable
                 'enable' => $this->getEnable(),
                 'email' => $this->getEmail()
             ],
-            function ($value) {
+            static function ($value) {
                 return $value !== null;
             }
         ) ?: null;

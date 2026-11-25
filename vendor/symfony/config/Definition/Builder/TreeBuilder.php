@@ -16,48 +16,55 @@ use Symfony\Component\Config\Definition\NodeInterface;
 /**
  * This is the entry class for building a config tree.
  *
+ * @template T of 'array'|'variable'|'scalar'|'string'|'boolean'|'integer'|'float'|'enum' = 'array'
+ *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 class TreeBuilder implements NodeParentInterface
 {
-    protected $tree;
-    protected $root;
-    protected $builder;
+    protected ?NodeInterface $tree = null;
+    /**
+     * @var NodeDefinition<$this>|null
+     */
+    protected ?NodeDefinition $root = null;
 
     /**
-     * Creates the root node.
-     *
-     * @param string      $name    The name of the root node
-     * @param string      $type    The type of the root node
-     * @param NodeBuilder $builder A custom node builder instance
-     *
-     * @return ArrayNodeDefinition|NodeDefinition The root node (as an ArrayNodeDefinition when the type is 'array')
-     *
-     * @throws \RuntimeException When the node type is not supported
+     * @param T $type
      */
-    public function root($name, $type = 'array', NodeBuilder $builder = null)
+    public function __construct(string $name, string $type = 'array', ?NodeBuilder $builder = null)
     {
-        $builder = $builder ?: new NodeBuilder();
-
-        return $this->root = $builder->node($name, $type)->setParent($this);
+        $builder ??= new NodeBuilder();
+        $this->root = $builder->node($name, $type)->setParent($this);
     }
 
     /**
-     * Builds the tree.
-     *
-     * @return NodeInterface
-     *
-     * @throws \RuntimeException
+     * @return (
+     *    T is 'array' ? ArrayNodeDefinition<$this>
+     *    : (T is 'variable' ? VariableNodeDefinition<$this>
+     *    : (T is 'scalar' ? ScalarNodeDefinition<$this>
+     *    : (T is 'string' ? StringNodeDefinition<$this>
+     *    : (T is 'boolean' ? BooleanNodeDefinition<$this>
+     *    : (T is 'integer' ? IntegerNodeDefinition<$this>
+     *    : (T is 'float' ? FloatNodeDefinition<$this>
+     *    : (T is 'enum' ? EnumNodeDefinition<$this>
+     *    : NodeDefinition<$this>)))))))
+     * )
      */
-    public function buildTree()
+    public function getRootNode(): NodeDefinition
     {
-        if (null === $this->root) {
-            throw new \RuntimeException('The configuration tree has no root node.');
-        }
-        if (null !== $this->tree) {
-            return $this->tree;
-        }
+        return $this->root;
+    }
 
-        return $this->tree = $this->root->getNode(true);
+    public function buildTree(): NodeInterface
+    {
+        return $this->tree ??= $this->root->getNode(true);
+    }
+
+    public function setPathSeparator(string $separator): void
+    {
+        // unset last built as changing path separator changes all nodes
+        $this->tree = null;
+
+        $this->root->setPathSeparator($separator);
     }
 }

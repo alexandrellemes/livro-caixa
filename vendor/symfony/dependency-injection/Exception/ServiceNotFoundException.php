@@ -11,22 +11,28 @@
 
 namespace Symfony\Component\DependencyInjection\Exception;
 
+use Psr\Container\NotFoundExceptionInterface;
+
 /**
  * This exception is thrown when a non-existent service is requested.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class ServiceNotFoundException extends InvalidArgumentException
+class ServiceNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
-    private $id;
-    private $sourceId;
-
-    public function __construct($id, $sourceId = null, \Exception $previous = null, array $alternatives = array())
-    {
-        if (null === $sourceId) {
-            $msg = sprintf('You have requested a non-existent service "%s".', $id);
+    public function __construct(
+        private string $id,
+        private ?string $sourceId = null,
+        ?\Throwable $previous = null,
+        private array $alternatives = [],
+        ?string $msg = null,
+    ) {
+        if (null !== $msg) {
+            // no-op
+        } elseif (null === $sourceId) {
+            $msg = \sprintf('You have requested a non-existent service "%s".', $id);
         } else {
-            $msg = sprintf('The service "%s" has a dependency on a non-existent service "%s".', $sourceId, $id);
+            $msg = \sprintf('The service "%s" has a dependency on a non-existent service "%s".', $sourceId, $id);
         }
 
         if ($alternatives) {
@@ -39,18 +45,20 @@ class ServiceNotFoundException extends InvalidArgumentException
         }
 
         parent::__construct($msg, 0, $previous);
-
-        $this->id = $id;
-        $this->sourceId = $sourceId;
     }
 
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    public function getSourceId()
+    public function getSourceId(): ?string
     {
         return $this->sourceId;
+    }
+
+    public function getAlternatives(): array
+    {
+        return $this->alternatives;
     }
 }

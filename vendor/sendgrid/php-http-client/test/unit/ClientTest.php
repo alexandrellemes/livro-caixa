@@ -2,10 +2,11 @@
 
 namespace SendGrid\Test;
 
+use PHPUnit\Framework\TestCase;
 use SendGrid\Client;
 use SendGrid\Exception\InvalidRequest;
 
-class ClientTest extends \PHPUnit_Framework_TestCase
+class ClientTest extends TestCase
 {
     /** @var MockClient */
     private $client;
@@ -14,7 +15,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     /** @var array */
     private $headers;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->host = 'https://localhost:4010';
         $this->headers = [
@@ -26,13 +27,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertAttributeEquals($this->host, 'host', $this->client);
-        $this->assertAttributeEquals($this->headers, 'headers', $this->client);
-        $this->assertAttributeEquals('/v3', 'version', $this->client);
-        $this->assertAttributeEquals([], 'path', $this->client);
-        $this->assertAttributeEquals([], 'curlOptions', $this->client);
-        $this->assertAttributeEquals(false, 'retryOnLimit', $this->client);
-        $this->assertAttributeEquals(['get', 'post', 'patch',  'put', 'delete'], 'methods', $this->client);
+        $this->assertEquals($this->host, $this->client->getHost());
+        $this->assertEquals($this->headers, $this->client->getHeaders());
+        $this->assertEquals('/v3', $this->client->getVersion());
+        $this->assertEquals([], $this->client->getPath());
+        $this->assertEquals([], $this->client->getCurlOptions());
     }
 
     public function test_()
@@ -41,34 +40,34 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client->setCurlOptions(['foo' => 'bar']);
         $client = $client->_('test');
 
-        $this->assertAttributeEquals(['test'], 'path', $client);
-        $this->assertAttributeEquals(['foo' => 'bar'], 'curlOptions', $client);
+        $this->assertEquals(['test'], $client->getPath());
+        $this->assertEquals(['foo' => 'bar'], $client->getCurlOptions());
     }
 
     public function test__call()
     {
         $client = $this->client->get();
-        $this->assertAttributeEquals('https://localhost:4010/v3/', 'url', $client);
+        $this->assertEquals('https://localhost:4010/v3/', $client->url);
 
         $queryParams = ['limit' => 100, 'offset' => 0];
         $client = $this->client->get(null, $queryParams);
-        $this->assertAttributeEquals('https://localhost:4010/v3/?limit=100&offset=0', 'url', $client);
+        $this->assertEquals('https://localhost:4010/v3/?limit=100&offset=0', $client->url);
 
         $requestBody = ['name' => 'A New Hope'];
         $client = $this->client->get($requestBody);
-        $this->assertAttributeEquals($requestBody, 'requestBody', $client);
+        $this->assertEquals($requestBody, $client->requestBody);
 
         $requestHeaders = ['X-Mock: 200'];
         $client = $this->client->get(null, null, $requestHeaders);
-        $this->assertAttributeEquals($requestHeaders, 'requestHeaders', $client);
+        $this->assertEquals($requestHeaders, $client->requestHeaders);
 
         $client = $this->client->version('/v4');
-        $this->assertAttributeEquals('/v4', 'version', $client);
+        $this->assertEquals('/v4', $client->getVersion());
 
         $client = $this->client->path_to_endpoint();
-        $this->assertAttributeEquals(['path_to_endpoint'], 'path', $client);
+        $this->assertEquals(['path_to_endpoint'], $client->getPath());
         $client = $client->one_more_segment();
-        $this->assertAttributeEquals(['path_to_endpoint', 'one_more_segment'], 'path', $client);
+        $this->assertEquals(['path_to_endpoint', 'one_more_segment'], $client->getPath());
     }
 
     public function testGetHost()
@@ -77,9 +76,19 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('https://localhost:4010', $client->getHost());
     }
 
+    public function testSetHost()
+    {
+        $client = new Client('https://localhost:4010');
+        $client->setHost("https://api.test.com");
+        $this->assertSame('https://api.test.com', $client->getHost());
+    }
+
     public function testGetHeaders()
     {
-        $client = new Client('https://localhost:4010', ['Content-Type: application/json', 'Authorization: Bearer SG.XXXX']);
+        $client = new Client(
+            'https://localhost:4010',
+            ['Content-Type: application/json', 'Authorization: Bearer SG.XXXX']
+        );
         $this->assertSame(['Content-Type: application/json', 'Authorization: Bearer SG.XXXX'], $client->getHeaders());
 
         $client2 = new Client('https://localhost:4010');
@@ -92,7 +101,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('/v3', $client->getVersion());
 
         $client = new Client('https://localhost:4010');
-        $this->assertSame(null, $client->getVersion());
+        $this->assertNull($client->getVersion());
     }
 
     public function testGetPath()
@@ -123,7 +132,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client->get(null, ['limit' => 100, 'offset' => 0]);
 
         // returns 3 response object
-        $this->assertEquals(3, count($client->send()));
+        $this->assertCount(3, $client->send());
     }
 
     public function testCreateCurlOptionsWithMethodOnly()
@@ -199,9 +208,35 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function testThrowExceptionOnInvalidCall()
     {
-        $this->setExpectedException(InvalidRequest::class);
-        $client = new Client('invalid://url',['User-Agent: Custom-Client 1.0']);
+        $this->expectException(InvalidRequest::class);
+
+        $client = new Client('invalid://url', ['User-Agent: Custom-Client 1.0']);
         $client->get();
+    }
+
+    public function testMakeRequestWithUntrustedRootCert()
+    {
+        $this->expectException(InvalidRequest::class);
+        $this->expectExceptionMessageMatches('/certificate/i');
+
+        $client = new Client('https://untrusted-root.badssl.com/');
+        $client->makeRequest('GET', 'https://untrusted-root.badssl.com/');
+    }
+
+    public function testFormRepeatUrlArgs()
+    {
+        $client = new Client('https://localhost:4010');
+
+        $testParams = [
+            'thing' => 'stuff',
+            'foo' => [
+                'bar',
+                'bat',
+                'baz',
+            ],
+        ];
+        $result = $this->callMethod($client, 'buildUrl', [$testParams]);
+        $this->assertEquals('https://localhost:4010/?thing=stuff&foo=bar&foo=bat&foo=baz', $result);
     }
 
     /**

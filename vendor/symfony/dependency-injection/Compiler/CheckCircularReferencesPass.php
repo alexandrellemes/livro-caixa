@@ -26,19 +26,20 @@ use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceExce
  */
 class CheckCircularReferencesPass implements CompilerPassInterface
 {
-    private $currentPath;
-    private $checkedNodes;
+    private array $currentPath;
+    private array $checkedNodes;
+    private array $checkedLazyNodes;
 
     /**
      * Checks the ContainerBuilder object for circular references.
      */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $graph = $container->getCompiler()->getServiceReferenceGraph();
 
-        $this->checkedNodes = array();
+        $this->checkedNodes = [];
         foreach ($graph->getNodes() as $id => $node) {
-            $this->currentPath = array($id);
+            $this->currentPath = [$id];
 
             $this->checkOutEdges($node->getOutEdges());
         }
@@ -51,28 +52,42 @@ class CheckCircularReferencesPass implements CompilerPassInterface
      *
      * @throws ServiceCircularReferenceException when a circular reference is found
      */
-    private function checkOutEdges(array $edges)
+    private function checkOutEdges(array $edges): void
     {
         foreach ($edges as $edge) {
             $node = $edge->getDestNode();
             $id = $node->getId();
 
-            if (empty($this->checkedNodes[$id])) {
-                // don't check circular dependencies for lazy services
-                if (!$node->getValue() || !$node->getValue()->isLazy()) {
-                    $searchKey = array_search($id, $this->currentPath);
-                    $this->currentPath[] = $id;
+            if (!empty($this->checkedNodes[$id])) {
+                continue;
+            }
 
-                    if (false !== $searchKey) {
-                        throw new ServiceCircularReferenceException($id, \array_slice($this->currentPath, $searchKey));
-                    }
+            $isLeaf = (bool) $node->getValue();
+            $isConcrete = !$edge->isLazy() && !$edge->isWeak();
 
-                    $this->checkOutEdges($node->getOutEdges());
+            // Skip already checked lazy services if they are still lazy. Will not gain any new information.
+            if (!empty($this->checkedLazyNodes[$id]) && (!$isLeaf || !$isConcrete)) {
+                continue;
+            }
+
+            // Process concrete references, otherwise defer check circular references for lazy edges.
+            if (!$isLeaf || $isConcrete) {
+                $searchKey = array_search($id, $this->currentPath);
+                $this->currentPath[] = $id;
+
+                if (false !== $searchKey) {
+                    throw new ServiceCircularReferenceException($id, \array_slice($this->currentPath, $searchKey));
                 }
 
+                $this->checkOutEdges($node->getOutEdges());
+
                 $this->checkedNodes[$id] = true;
-                array_pop($this->currentPath);
+                unset($this->checkedLazyNodes[$id]);
+            } else {
+                $this->checkedLazyNodes[$id] = true;
             }
+
+            array_pop($this->currentPath);
         }
     }
 }

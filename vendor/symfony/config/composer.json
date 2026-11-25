@@ -1,7 +1,7 @@
 {
     "name": "symfony/config",
     "type": "library",
-    "description": "Symfony Config Component",
+    "description": "Helps you find, load, combine, autofill and validate configuration values of any kind",
     "keywords": [],
     "homepage": "https://symfony.com",
     "license": "MIT",
@@ -16,15 +16,21 @@
         }
     ],
     "require": {
-        "php": ">=5.3.9",
-        "symfony/filesystem": "~2.3|~3.0.0",
+        "php": ">=8.2",
+        "symfony/deprecation-contracts": "^2.5|^3",
+        "symfony/filesystem": "^7.1|^8.0",
         "symfony/polyfill-ctype": "~1.8"
     },
     "require-dev": {
-        "symfony/yaml": "~2.7|~3.0.0"
+        "symfony/event-dispatcher": "^6.4|^7.0|^8.0",
+        "symfony/finder": "^6.4|^7.0|^8.0",
+        "symfony/messenger": "^6.4|^7.0|^8.0",
+        "symfony/service-contracts": "^2.5|^3",
+        "symfony/yaml": "^6.4|^7.0|^8.0"
     },
-    "suggest": {
-        "symfony/yaml": "To use the yaml reference dumper"
+    "conflict": {
+        "symfony/finder": "<6.4",
+        "symfony/service-contracts": "<2.5"
     },
     "autoload": {
         "psr-4": { "Symfony\\Component\\Config\\": "" },
@@ -32,10 +38,5 @@
             "/Tests/"
         ]
     },
-    "minimum-stability": "dev",
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.8-dev"
-        }
-    }
+    "minimum-stability": "dev"
 }
