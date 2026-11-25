@@ -4,7 +4,7 @@ Livro Caixa é um sistema em PHP/MySQL para o controle mensal de caixa: categori
 
 Teve como ideia inicial o projeto Livro-Caixa de Felipe Ismael Barth ([fibbarth](https://github.com/fibbarth)).
 
-## Novidades da versão 2.0
+## Novidades da versão 2.1
 
 * **Nova estrutura MVC** (`app/`): roteador, controllers, services, repositórios PDO e views, com `public/` como raiz do servidor web.
 * **Interface renovada** com Bootstrap: dashboard mensal, listagens de categorias e movimentos com botões de Detalhes / Editar / Remover e valores formatados em reais (R$ 1.000,00).
@@ -14,7 +14,9 @@ Teve como ideia inicial o projeto Livro-Caixa de Felipe Ismael Barth ([fibbarth]
 * **API REST v1** (`/api/v1`) com autenticação por token: categorias, movimentos, resumo e logs — veja [docs/API.md](docs/API.md).
 * **Ambiente Docker**: PHP 8.2 + Apache e MariaDB 10.11 via `docker compose`.
 * Correções: valores monetários gravados corretamente (antes `1.000,00` virava `1`) e edição de movimento passa a salvar a alteração de mês/ano.
-* Removido o antigo `api.php`, que não tinha autenticação e expunha a tabela de usuários.
+* **PDV integrado** (`/pdv`): exige login de admin, grava pelo service (com validação e log) e calcula o troco.
+* **Recuperação de senha** por link com token (`/recuperar-senha`), com envio por SendGrid ou SMTP. Antes o e-mail nunca era enviado, porque as configurações do `.env` não eram lidas.
+* Removidos arquivos legados inseguros: o antigo `api.php` (sem autenticação, expunha a tabela de usuários), o `pdv.php` (gravava sem login e com SQL concatenado), o `process.php` (trocava a senha de qualquer e-mail, sem token), `recover.php`, `sendgrid.php`, `login.old.php` e a biblioteca phpSecurePages. Os endereços antigos redirecionam para as novas rotas.
 
 ## Requisitos
 
@@ -67,7 +69,9 @@ Copie `.env.example` para `.env` e edite os valores. O `.env` contém senhas e c
 | `DB_ROOT_PASSWORD` | Senha root do MariaDB (somente Docker) |
 | `APP_PASSWORD`, `APP_EMAIL` | Senha e e-mail iniciais do usuário `admin` |
 | `APP_VIEWER_PASSWORD`, `APP_VIEWER_EMAIL` | Senha e e-mail iniciais do usuário `viewer` |
-| `SENDGRID_API_KEY`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Envio do e-mail de recuperação de senha |
+| `SENDGRID_API_KEY` | Envio de e-mail pela API do SendGrid (tem prioridade sobre o SMTP) |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION` | Envio de e-mail por SMTP (PHPMailer), usado quando não há `SENDGRID_API_KEY`. `MAIL_ENCRYPTION`: `tls`, `ssl` ou `none` |
+| `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `MAIL_REPLAYTO_MAIL`, `MAIL_REPLAYTO_NAME` | Remetente e endereço de resposta dos e-mails |
 | `LOG_LEVEL` | Nível mínimo gravado nos logs: `debug`, `info`, `warning`, `error` ou `critical` (padrão: `debug` em development, `info` nos demais) |
 | `API_CORS_ORIGIN` | Opcional: origem liberada para chamar a API de um navegador (ex.: `https://app.exemplo.com`) |
 
@@ -93,6 +97,7 @@ Os usuários ficam em `app/Storage/users.json`, criado automaticamente na primei
 | `/` | Dashboard do mês: lançamentos, categorias e resultado | viewer |
 | `/categorias/listar` | Categorias (cadastro, edição, remoção) | viewer / admin para alterar |
 | `/movimentos/listar` | Movimentos de receita e despesa | viewer / admin para alterar |
+| `/pdv` | PDV: lançamento rápido do dia (dinheiro, cartão ou despesa) com cálculo de troco | admin |
 | `/logs` | Logs de auditoria com filtros e limpeza | admin |
 | `/recuperar-senha` | Recuperação de senha por e-mail | público |
 | `/api/v1` | API REST (documentação em [docs/API.md](docs/API.md)) | token |
@@ -136,7 +141,7 @@ public/          Raiz do servidor web (index.php, .htaccess)
 * Ajustes para uso mobile e modelagem do banco
 * PHPMailer para recuperação de senha
 * Visão dos lançamentos com FullCalendar
-* PDV (`/pdv.php`)
+* PDV (hoje em `/pdv`, integrado à aplicação)
 * Login via Facebook SDK, como exemplo
 * Início do app Flutter com uso da API
 
@@ -146,7 +151,6 @@ public/          Raiz do servidor web (index.php, .htaccess)
 * [jquery/jquery-ui](https://github.com/jquery/jquery-ui)
 * [jquery-maskmoney](https://github.com/plentz/jquery-maskmoney)
 * [PHPMailer](https://github.com/PHPMailer/PHPMailer) / [SendGrid](https://github.com/sendgrid/sendgrid-php)
-* [phpSecurePages](http://www.phpsecurepages.com/)
 * [FullCalendar](http://fullcalendar.io)
 * [Facebook](https://developers.facebook.com)
 

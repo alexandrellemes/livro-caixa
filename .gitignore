@@ -3,3 +3,4 @@
 .env.local
 vendor/
 .vagrant/
+nbproject/
