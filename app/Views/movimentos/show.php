@@ -17,7 +17,7 @@ require_once __DIR__ . '/../partials/header.php';
                     <p><strong>Data:</strong> <?= htmlspecialchars((string) $data['movimento']['dia'] . '/' . $data['movimento']['mes'] . '/' . $data['movimento']['ano']) ?></p>
                     <p><strong>Tipo:</strong> <?= (int) $data['movimento']['tipo'] === 1 ? 'Receita' : 'Despesa' ?></p>
                     <p><strong>Categoria:</strong> <?= htmlspecialchars((string) ($data['movimento']['categoria_id'] ?? '')) ?></p>
-                    <p><strong>Valor:</strong> R$ <?= htmlspecialchars((string) $data['movimento']['valor']) ?></p>
+                    <p><strong>Valor:</strong> <?= formata_dinheiro((float) $data['movimento']['valor']) ?></p>
                     <a href="/movimentos/editar/<?= (int) $data['movimento']['id'] ?>" class="btn btn-primary">Editar</a>
                     <a href="/movimentos/listar" class="btn btn-default">Voltar</a>
                 </div>

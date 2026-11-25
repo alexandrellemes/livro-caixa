@@ -40,7 +40,7 @@ $success = Session::getFlash('success');
             </div>
             <div class="form-group">
                 <label for="valor">Valor</label>
-                <input type="text" id="valor" name="valor" class="form-control" value="<?= isset($data['movimento']) ? htmlspecialchars((string) $data['movimento']['valor']) : '' ?>" />
+                <input type="text" id="valor" name="valor" class="form-control" data-symbol="R$ " data-thousands="." data-decimal="," value="<?= isset($data['movimento']) ? htmlspecialchars(number_format((float) $data['movimento']['valor'], 2, ',', '.')) : '' ?>" />
             </div>
             <button type="submit" class="btn btn-primary">Salvar</button>
             <a href="/movimentos/listar" class="btn btn-default">Voltar</a>

@@ -2,7 +2,7 @@
 
 use App\Support\Session;
 
-require_once __DIR__ . '/../partials/header.php';
+require_once __DIR__ . '/partials/header.php';
 
 ?>
     <div class="form-group row">

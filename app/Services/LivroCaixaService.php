@@ -138,8 +138,31 @@ final class LivroCaixaService
         return $data ?: null;
     }
 
+    /**
+     * Converte o valor digitado para o formato numérico do banco ("1234.56").
+     * Aceita formato brasileiro ("R$ 1.234,56") e americano ("1,234.56"):
+     * o último separador seguido de 1 ou 2 dígitos é o decimal; os demais são de milhar.
+     */
     private function normalizarValor(string $valor): string
     {
-        return str_replace(',', '.', str_replace('.', '', $valor));
+        $valor = preg_replace('/[^\d,.\-]/', '', $valor) ?? '';
+        $negativo = str_starts_with($valor, '-');
+        $valor = str_replace('-', '', $valor);
+
+        $posicao = max((int) strrpos($valor, ','), (int) strrpos($valor, '.'));
+        $temSeparador = strpbrk($valor, ',.') !== false;
+        $casasDecimais = strlen($valor) - $posicao - 1;
+
+        if ($temSeparador && $casasDecimais >= 1 && $casasDecimais <= 2) {
+            $inteiro = preg_replace('/\D/', '', substr($valor, 0, $posicao));
+            $decimal = substr($valor, $posicao + 1);
+        } else {
+            $inteiro = preg_replace('/\D/', '', $valor);
+            $decimal = '';
+        }
+
+        $numero = ($inteiro === '' ? '0' : $inteiro) . ($decimal !== '' ? '.' . $decimal : '');
+
+        return ($negativo ? '-' : '') . $numero;
     }
 }

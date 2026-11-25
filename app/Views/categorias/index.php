@@ -15,15 +15,13 @@ $success = Session::getFlash('success');
         <p><a href="/categorias/novo" class="btn btn-primary">Nova categoria</a></p>
         <ul class="list-group">
             <?php foreach ($data['categorias'] as $categoria): ?>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
-                        <a href="/categorias/detalhes/<?= (int) $categoria['id'] ?>" class="btn btn-link btn-xs">Detalhes</a>
-                        <?= htmlspecialchars($categoria['nome']) ?>
+                <li class="list-group-item clearfix">
+                    <span class="pull-right">
+                        <a href="/categorias/detalhes/<?= (int) $categoria['id'] ?>" class="btn btn-default btn-xs">Detalhes</a>
+                        <a href="/categorias/editar/<?= (int) $categoria['id'] ?>" class="btn btn-primary btn-xs">Editar</a>
+                        <a href="/categorias/remover/<?= (int) $categoria['id'] ?>" class="btn btn-danger btn-xs" onclick="return confirm('Deseja remover esta categoria?')">Remover</a>
                     </span>
-                    <span>
-                        <a href="/categorias/editar/<?= (int) $categoria['id'] ?>" class="btn btn-link btn-xs">Editar</a>
-                        <a href="/categorias/remover/<?= (int) $categoria['id'] ?>" class="btn btn-link btn-xs text-danger" onclick="return confirm('Deseja remover esta categoria?')">Remover</a>
-                    </span>
+                    <?= htmlspecialchars((string) $categoria['nome']) ?>
                 </li>
             <?php endforeach; ?>
         </ul>

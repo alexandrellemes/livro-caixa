@@ -116,7 +116,7 @@ $linkPagina = static function (int $pagina) use ($f): string {
                         <td><?= $e($log['mensagem']) ?></td>
                         <td><?= $e($log['usuario'] ?? '—') ?></td>
                         <td><?= $e($log['ip'] ?? '') ?></td>
-                        <td><a href="/logs/detalhes/<?= (int) $log['id'] ?>" class="btn btn-link btn-xs">Detalhes</a></td>
+                        <td><a href="/logs/detalhes/<?= (int) $log['id'] ?>" class="btn btn-default btn-xs">Detalhes</a></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
