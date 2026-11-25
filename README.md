@@ -25,7 +25,11 @@ Teve como ideia inicial o projeto Livro-Caixa de Felipe Ismael Barth ([fibbarth]
 
 ## Instalação com Docker (recomendado)
 
-1. Configure o arquivo `.env` na raiz do projeto (veja [Configuração](#configuração)). Para o Docker use `DB_HOST=app_db` e defina também `DB_ROOT_PASSWORD`.
+1. Crie o `.env` a partir do modelo e preencha as senhas (veja [Configuração](#configuração)). Para o Docker use `DB_HOST=app_db` e defina também `DB_ROOT_PASSWORD`:
+
+   ```bash
+   cp .env.example .env
+   ```
 2. Suba os containers:
 
    ```bash
@@ -52,7 +56,7 @@ O banco é criado automaticamente na primeira execução a partir de `docs/livro
 
 ## Configuração
 
-Edite o arquivo `.env` na raiz do projeto:
+Copie `.env.example` para `.env` e edite os valores. O `.env` contém senhas e chaves e **não deve ser versionado** (já está no `.gitignore`). Não use linhas de comentário no `.env`: toda linha precisa ter o formato `CHAVE=valor`.
 
 | Variável | Descrição |
 |---|---|
