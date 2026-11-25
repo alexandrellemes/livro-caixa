@@ -51,8 +51,8 @@ require_once __DIR__ . '/partials/header.php';
                 <table class="table" cellpadding="10" cellspacing="0" width="auto" align="center">
                     <tr>
                         <td align="right">
-                            <a href="javascript:;" onclick="abreFecha('add_cat')" class="bnt">[+] Adicionar Categoria</a>
-                            <a href="javascript:;" onclick="abreFecha('add_movimento')" class="bnt"><strong>[+] Adicionar Movimento</strong></a>
+                            <button type="button" onclick="abreFecha('add_cat')" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-plus"></span> Adicionar Categoria</button>
+                            <button type="button" onclick="abreFecha('add_movimento')" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"></span> Adicionar Movimento</button>
                         </td>
                     </tr>
                     <tr>
