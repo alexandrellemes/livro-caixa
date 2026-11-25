@@ -24,8 +24,21 @@ require_once __DIR__ . '/partials/header.php';
         </label>
         <label class="control-label col-md-10 text-justify">
             <?php for ($i = 1; $i <= 12; $i++): ?>
+                <?php
+                $saldoMes = $data['saldosPorMes'][$i] ?? 0.0;
+                $estiloMes = '';
+                if ($saldoMes > 0.004) {
+                    $estiloMes = 'color: #2e8b3d;';   // saldo positivo: verde
+                } elseif ($saldoMes < -0.004) {
+                    $estiloMes = 'color: #c0392b;';   // saldo negativo: vermelho
+                }
+                if ((int) $data['mes'] === $i) {
+                    // Mês selecionado: destaque em tamanho/negrito; mantém azul claro só quando o saldo é zero.
+                    $estiloMes = 'font-size:20px; font-weight:bold; ' . ($estiloMes ?: 'color: lightblue;');
+                }
+                ?>
                 <span align="center" style="padding-right:5px; padding-left:5px;">
-                    <a href="?mes=<?= $i ?>&ano=<?= $data['ano'] ?>" style="<?= ((int) $data['mes'] === $i) ? 'font-size:20px; font-weight:bold; color: lightblue;' : '' ?>">
+                    <a href="?mes=<?= $i ?>&ano=<?= $data['ano'] ?>" style="<?= $estiloMes ?>" title="Saldo: R$ <?= number_format($saldoMes, 2, ',', '.') ?>">
                         <?= mostraMes($i) ?>
                     </a>
                 </span>

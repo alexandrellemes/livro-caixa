@@ -27,8 +27,10 @@ final class LivroCaixaService
         $movimentos = $this->repository->getMovimentos($mes, $ano, $filtroCategoria);
         $resumoMensal = $this->repository->getResumoMensal($mes, $ano);
         $resumoGeral = $this->repository->getResumoGeral();
+        $saldosPorMes = $this->repository->getSaldosPorMes($ano);
 
         return [
+            'saldosPorMes' => $saldosPorMes,
             'mes' => $mes,
             'ano' => $ano,
             'categorias' => $categorias,
