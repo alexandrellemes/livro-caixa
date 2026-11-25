@@ -1,95 +1,145 @@
-# Livro Caixa 
+# Livro Caixa
 
-Livro Caixa é um sistema simples baseado em PHP/MySQL para o controle mensal de seu caixa.
+Livro Caixa é um sistema em PHP/MySQL para o controle mensal de caixa: categorias, lançamentos de receitas e despesas, resumo mensal e geral, logs de auditoria e uma API REST para integração com outros sistemas e apps.
 
-Teve como idéia inicial o projeto Livro-Caixa de Felipe Ismael Barth (fibbarth)
-https://github.com/fibbarth
+Teve como ideia inicial o projeto Livro-Caixa de Felipe Ismael Barth ([fibbarth](https://github.com/fibbarth)).
 
-Algumas melhorias:
-* Inclusão da Bootstrap
-* Inclusão do phpSecurePages
-* Autenticação no banco com hashing e crypto na senha
-* Algumas modificações para facilitar o uso mobile
-* Modelagem do banco
-* O arquivo de modelagem e banco estão na pasta <Instalar>.
-* Utilização da biblioteca PHPMailer para a recuperação de senha
-* Visão dos lançamentos através do FullCalendar.
-* Retirada do elemento "table" em algumas entradas de dados.
-* Retirada de cores em excesso.
-* Inclusão do PDV
-* Envio de e-mail para recuperar senha.
-* Login via biblioteca Facebook-SDK, como exemplo.
-* Acréscimo do módulo API.php para retorno via JSON das tabelas: usuarios, categorias e movimentos.
-* Início da APP / Flutter com uso da API.
+## Novidades da versão 2.0
 
-## PDV
+* **Nova estrutura MVC** (`app/`): roteador, controllers, services, repositórios PDO e views, com `public/` como raiz do servidor web.
+* **Interface renovada** com Bootstrap: dashboard mensal, listagens de categorias e movimentos com botões de Detalhes / Editar / Remover e valores formatados em reais (R$ 1.000,00).
+* **Perfis de acesso**: `admin` (consulta e altera) e `viewer` (somente consulta).
+* **Segurança**: proteção CSRF nos formulários, senhas com hash, consultas com *prepared statements* e páginas de erro 403/404/500.
+* **Logs de auditoria em banco de dados**: login/logout, tentativas de acesso negado, recuperação de senha, criação/edição/remoção de categorias e movimentos (com o estado *antes* e *depois*) e erros da aplicação. Tela de consulta em `/logs` (admin) com filtros, paginação e limpeza de registros antigos.
+* **API REST v1** (`/api/v1`) com autenticação por token: categorias, movimentos, resumo e logs — veja [docs/API.md](docs/API.md).
+* **Ambiente Docker**: PHP 8.2 + Apache e MariaDB 10.11 via `docker compose`.
+* Correções: valores monetários gravados corretamente (antes `1.000,00` virava `1`) e edição de movimento passa a salvar a alteração de mês/ano.
+* Removido o antigo `api.php`, que não tinha autenticação e expunha a tabela de usuários.
 
-Uso: seu.domino/pdv.php
+## Requisitos
 
-## Recover
+* PHP >= 8.1 (o ambiente Docker usa PHP 8.2) com as extensões `pdo_mysql`, `mysqli`, `mbstring` e `json`
+* MySQL 5.7+ ou MariaDB 10.x
+* Apache com `mod_rewrite` (o `public/.htaccess` encaminha as rotas para `public/index.php`)
+* [Composer](https://getcomposer.org/)
 
-Uso: seu.dominio/recover.php
+## Instalação com Docker (recomendado)
 
+1. Configure o arquivo `.env` na raiz do projeto (veja [Configuração](#configuração)). Para o Docker use `DB_HOST=app_db` e defina também `DB_ROOT_PASSWORD`.
+2. Suba os containers:
 
-﻿Seguem instruções de instalação e configuração
-----------------------------------------------
+   ```bash
+   docker compose build web
+   docker compose up -d
+   ```
 
-O arquivo para criação do banco de dados está na pasta: Instalar/livro_caixa.sql.
+3. Instale as dependências do PHP (se a pasta `vendor/` não existir):
 
-O arquivo com a modelagm está na pasta Instalar também.
+   ```bash
+   docker exec -it app_web composer install
+   ```
 
-Rode o COMPOSER, a partir da raiz da aplicação, para instalar as dependências:
+4. Acesse `http://localhost:8080`.
 
-# $ ./composer.phar install
+O banco é criado automaticamente na primeira execução a partir de `docs/livro_caixa.sql`. As tabelas `logs` e `api_tokens` também são criadas automaticamente no primeiro uso. Se o usuário do banco não tiver permissões suficientes, aplique `docs/grants_livro_caixa.sql`.
 
-ou
+## Instalação manual
 
-# $ composer install
+1. Aponte o *DocumentRoot* do Apache para a pasta `public/` e habilite o `mod_rewrite` com `AllowOverride All`. Os aliases de `/css`, `/js`, `/images` e `/fonts` estão em `docker/localhost.conf` como referência.
+2. Rode `composer install` na raiz do projeto.
+3. Configure o `.env`.
+4. Importe `docs/livro_caixa.sql` no MySQL (ou deixe a aplicação criar o banco na primeira execução).
 
-Caso tenha o COMPOSER instalado.
+## Configuração
 
+Edite o arquivo `.env` na raiz do projeto:
 
-Após importar o banco para o MySQl.
+| Variável | Descrição |
+|---|---|
+| `APP_ENV` | `development`, `testing` ou `production` (em `development` os erros são exibidos) |
+| `APP_URL` | URL pública da aplicação (usada nos links de recuperação de senha) |
+| `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Conexão com o banco (`DB_HOST=app_db` no Docker) |
+| `DB_ROOT_PASSWORD` | Senha root do MariaDB (somente Docker) |
+| `APP_PASSWORD`, `APP_EMAIL` | Senha e e-mail iniciais do usuário `admin` |
+| `APP_VIEWER_PASSWORD`, `APP_VIEWER_EMAIL` | Senha e e-mail iniciais do usuário `viewer` |
+| `SENDGRID_API_KEY`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Envio do e-mail de recuperação de senha |
+| `LOG_LEVEL` | Nível mínimo gravado nos logs: `debug`, `info`, `warning`, `error` ou `critical` (padrão: `debug` em development, `info` nos demais) |
+| `API_CORS_ORIGIN` | Opcional: origem liberada para chamar a API de um navegador (ex.: `https://app.exemplo.com`) |
 
-## Configuração do sistema
-#### Arquivo .ENV
+## Acesso
 
-Acesse a pasta raiz do projeto, edite o arquivo '.env' e altere as configurações conforme o seu ambiente.
+Os usuários ficam em `app/Storage/users.json`, criado automaticamente na primeira execução:
 
-#### Observação: 
+| Usuário | Perfil | Senha inicial |
+|---|---|---|
+| `admin` | admin | valor de `APP_PASSWORD` (padrão: `123`) |
+| `viewer` | viewer | valor de `APP_VIEWER_PASSWORD` (padrão: `viewer123`) |
 
-1. As outras bibliotecas estão integradas com a configuração do sistema.
-2. Os ambientes para a diretiva APP_ENV, do arquivo .env são:
-   1. development
-   2. testing
-   3. production
+> **Altere as senhas padrão** antes de usar em produção — defina-as no `.env` antes da primeira execução ou use a recuperação de senha.
 
----------------------------------------
+## Funcionalidades
 
-Dados de acesso
+| Rota | Descrição | Perfil |
+|---|---|---|
+| `/` | Dashboard do mês: lançamentos, categorias e resultado | viewer |
+| `/categorias/listar` | Categorias (cadastro, edição, remoção) | viewer / admin para alterar |
+| `/movimentos/listar` | Movimentos de receita e despesa | viewer / admin para alterar |
+| `/logs` | Logs de auditoria com filtros e limpeza | admin |
+| `/recuperar-senha` | Recuperação de senha por e-mail | público |
+| `/api/v1` | API REST (documentação em [docs/API.md](docs/API.md)) | token |
 
-Email: admin@admin.com
-Senha: 123456
+### API
 
-ou
+Exemplo rápido:
 
-Usuário: admin
-Senha: 123
+```bash
+# Gerar token
+curl -s -X POST http://localhost:8080/api/v1/auth/token \
+  -H 'Content-Type: application/json' -d '{"username": "admin", "password": "SUA_SENHA"}'
 
----------------------------------------
+# Lançar uma receita
+curl -s -X POST http://localhost:8080/api/v1/movimentos \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"data": "2026-11-25", "tipo": "receita", "descricao": "Venda", "valor": 1000.00, "categoria_id": 1}'
+```
+
+## Estrutura do projeto
+
+```
+app/
+  Api/           API REST v1 (roteamento, autenticação por token, endpoints)
+  Controllers/   Controllers das telas
+  Models/        Repositórios (PDO) e conexão com o banco
+  Services/      Regras de negócio
+  Support/       Autenticação, sessão, CSRF, logs, e-mail, tratamento de erros
+  Validation/    Validação de formulários
+  Views/         Telas
+config/          Leitura do .env e configuração
+docker/          Dockerfile e configuração do Apache
+docs/            Script do banco, modelagem (MySQL Workbench) e documentação da API
+public/          Raiz do servidor web (index.php, .htaccess)
+```
+
+## Histórico (versões anteriores)
+
+* Inclusão do Bootstrap e do phpSecurePages
+* Autenticação no banco com hashing na senha
+* Ajustes para uso mobile e modelagem do banco
+* PHPMailer para recuperação de senha
+* Visão dos lançamentos com FullCalendar
+* PDV (`/pdv.php`)
+* Login via Facebook SDK, como exemplo
+* Início do app Flutter com uso da API
 
 ### Frameworks/Bibliotecas
-* [twbs/bootstrap](https://github.com/twbs/bootstrap) 
-* [jquery/jquery](https://github.com/jquery/jquery) 
-* [jquery/jquery-ui](https://github.com/jquery/jquery-ui) 
-* [phpSecurePages](http://www.phpsecurepages.com/) 
-* [FullCalendar](http://fullcalendar.io) 
-* [Facebook](https://developers.facebook.com) 
-
-### Requerimento
-* PHP >= 5.6.0
-* MySQL
-* Atualmente rodando no PHP 7.4.
+* [twbs/bootstrap](https://github.com/twbs/bootstrap)
+* [jquery/jquery](https://github.com/jquery/jquery)
+* [jquery/jquery-ui](https://github.com/jquery/jquery-ui)
+* [jquery-maskmoney](https://github.com/plentz/jquery-maskmoney)
+* [PHPMailer](https://github.com/PHPMailer/PHPMailer) / [SendGrid](https://github.com/sendgrid/sendgrid-php)
+* [phpSecurePages](http://www.phpsecurepages.com/)
+* [FullCalendar](http://fullcalendar.io)
+* [Facebook](https://developers.facebook.com)
 
 ### Tutoriais
 #### Facebook
@@ -99,4 +149,3 @@ Senha: 123
 * Felipe Barth fibbarth@gmail.com
 * Augusto Cezar Perez augustoperez696@live.com
 * Alexandre LLemes - alexandre.llemes@gmail.com
-
