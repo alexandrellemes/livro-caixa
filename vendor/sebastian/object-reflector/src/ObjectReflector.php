@@ -1,51 +1,41 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * This file is part of object-reflector.
+ * This file is part of sebastian/object-reflector.
  *
  * (c) Sebastian Bergmann <sebastian@phpunit.de>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
-declare(strict_types=1);
-
 namespace SebastianBergmann\ObjectReflector;
 
-class ObjectReflector
+use function count;
+use function explode;
+
+final class ObjectReflector
 {
     /**
-     * @param object $object
-     *
-     * @return array
-     *
-     * @throws InvalidArgumentException
+     * @return array<string, mixed>
      */
-    public function getAttributes($object): array
+    public function getProperties(object $object): array
     {
-        if (!is_object($object)) {
-            throw new InvalidArgumentException;
-        }
-
-        $attributes = [];
-        $className  = get_class($object);
+        $properties = [];
+        $className  = $object::class;
 
         foreach ((array) $object as $name => $value) {
             $name = explode("\0", (string) $name);
 
             if (count($name) === 1) {
                 $name = $name[0];
+            } elseif ($name[1] !== $className) {
+                $name = $name[1] . '::' . $name[2];
             } else {
-                if ($name[1] !== $className) {
-                    $name = $name[1] . '::' . $name[2];
-                } else {
-                    $name = $name[2];
-                }
+                $name = $name[2];
             }
 
-            $attributes[$name] = $value;
+            $properties[$name] = $value;
         }
 
-        return $attributes;
+        return $properties;
     }
 }

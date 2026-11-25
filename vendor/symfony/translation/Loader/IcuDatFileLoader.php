@@ -23,28 +23,24 @@ use Symfony\Component\Translation\MessageCatalogue;
  */
 class IcuDatFileLoader extends IcuResFileLoader
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function load($resource, $locale, $domain = 'messages')
+    public function load(mixed $resource, string $locale, string $domain = 'messages'): MessageCatalogue
     {
         if (!stream_is_local($resource.'.dat')) {
-            throw new InvalidResourceException(sprintf('This is not a local file "%s".', $resource));
+            throw new InvalidResourceException(\sprintf('This is not a local file "%s".', $resource));
         }
 
         if (!file_exists($resource.'.dat')) {
-            throw new NotFoundResourceException(sprintf('File "%s" not found.', $resource));
+            throw new NotFoundResourceException(\sprintf('File "%s" not found.', $resource));
         }
 
         try {
             $rb = new \ResourceBundle($locale, $resource);
-        } catch (\Exception $e) {
-            // HHVM compatibility: constructor throws on invalid resource
+        } catch (\Exception) {
             $rb = null;
         }
 
         if (!$rb) {
-            throw new InvalidResourceException(sprintf('Cannot load resource "%s"', $resource));
+            throw new InvalidResourceException(\sprintf('Cannot load resource "%s".', $resource));
         } elseif (intl_is_failure($rb->getErrorCode())) {
             throw new InvalidResourceException($rb->getErrorMessage(), $rb->getErrorCode());
         }
@@ -53,7 +49,7 @@ class IcuDatFileLoader extends IcuResFileLoader
         $catalogue = new MessageCatalogue($locale);
         $catalogue->add($messages, $domain);
 
-        if (class_exists('Symfony\Component\Config\Resource\FileResource')) {
+        if (class_exists(FileResource::class)) {
             $catalogue->addResource(new FileResource($resource.'.dat'));
         }
 

@@ -1,51 +1,92 @@
 {
-    "name":         "behat/behat",
-    "description":  "Scenario-oriented BDD framework for PHP 5.3",
-    "keywords":     ["BDD", "Behat", "Symfony2"],
-    "homepage":     "http://behat.org/",
-    "type":         "library",
-    "license":      "MIT",
-    "authors":      [
+    "name": "behat/behat",
+    "description": "Scenario-oriented BDD framework for PHP",
+    "keywords": ["BDD", "ScenarioBDD", "StoryBDD", "Examples", "Scrum", "Agile", "User story", "Symfony", "business", "development", "testing", "documentation"],
+    "homepage": "https://behat.org/",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
         {
-            "name":      "Konstantin Kudryashov",
-            "email":     "ever.zet@gmail.com",
-            "homepage":  "http://everzet.com"
+            "name": "Konstantin Kudryashov",
+            "email": "ever.zet@gmail.com",
+            "homepage": "http://everzet.com"
         }
     ],
 
     "require": {
-        "php":                           ">=5.3.1",
-        "behat/gherkin":                 "~2.2.9",
-        "symfony/console":               "~2.0",
-        "symfony/config":                "~2.0",
-        "symfony/dependency-injection":  "~2.0",
-        "symfony/event-dispatcher":      "~2.0",
-        "symfony/translation":           "~2.0",
-        "symfony/yaml":                  "~2.0",
-        "symfony/finder":                "~2.0"
+        "php": ">=8.2 <8.6",
+        "ext-mbstring": "*",
+        "composer-runtime-api": "^2.2",
+        "behat/gherkin": "^4.17.0",
+        "composer/xdebug-handler": "^1.4 || ^2.0 || ^3.0",
+        "nikic/php-parser": "^4.19.2 || ^5.2",
+        "psr/container": "^1.0 || ^2.0",
+        "symfony/config": "^5.4 || ^6.4 || ^7.0",
+        "symfony/console": "^5.4.9 || ^6.4 || ^7.0",
+        "symfony/dependency-injection": "^5.4 || ^6.4 || ^7.0",
+        "symfony/event-dispatcher": "^5.4 || ^6.4 || ^7.0",
+        "symfony/translation": "^5.4 || ^6.4 || ^7.0",
+        "symfony/yaml": "^5.4 || ^6.4 || ^7.0"
     },
 
     "require-dev": {
-        "phpunit/phpunit": "~3.7.19"
+        "opis/json-schema": "^2.5",
+        "php-cs-fixer/shim": "^3.89",
+        "phpstan/phpstan": "2.1.46",
+        "phpunit/phpunit": "^9.6",
+        "rector/rector": "2.3.9",
+        "sebastian/diff": "^4.0",
+        "symfony/filesystem": "^5.4 || ^6.4 || ^7.0",
+        "symfony/polyfill-php84": "^1.31",
+        "symfony/process": "^5.4 || ^6.4 || ^7.0"
     },
 
     "suggest": {
-        "behat/symfony2-extension":  "for integration with Symfony2 web framework",
-        "behat/yii-extension":       "for integration with Yii web framework",
-        "behat/mink-extension":      "for integration with Mink testing framework"
+        "ext-dom": "Needed to output test results in JUnit format."
     },
 
     "autoload": {
-        "psr-0": {
-            "Behat\\Behat": "src/"
+        "psr-4": {
+            "Behat\\Behat\\": "src/Behat/Behat/",
+            "Behat\\Config\\": "src/Behat/Config/",
+            "Behat\\Testwork\\": "src/Behat/Testwork/",
+            "Behat\\Step\\": "src/Behat/Step/",
+            "Behat\\Hook\\": "src/Behat/Hook/",
+            "Behat\\Transformation\\": "src/Behat/Transformation/"
         }
     },
 
-    "bin": ["bin/behat"],
+    "autoload-dev": {
+        "psr-4": {
+            "Behat\\Tests\\": "tests/Behat/Tests/"
+        }
+    },
 
-    "extra": {
-        "branch-alias": {
-            "dev-develop": "2.4-dev"
+    "scripts": {
+        "all-tests": [
+            "@cs",
+            "@behat-progress",
+            "@phpunit",
+            "@phpstan",
+            "@rector"
+        ],
+        "behat": "LANG=C bin/behat  --rerun",
+        "behat-progress": "LANG=C bin/behat --format=progress",
+        "phpstan": "phpstan",
+        "phpunit": "phpunit",
+        "cs": "php-cs-fixer fix --dry-run --verbose --diff",
+        "cs-fix": "php-cs-fixer fix",
+        "rector": "rector --dry-run",
+        "rector-fix": "rector"
+    },
+
+    "bin": ["bin/behat"],
+    "config": {
+        "sort-packages": true,
+        "audit": {
+            "ignore": {
+                "PKSA-5jz8-6tcw-pbk4": "PHPunit is a dev dependency, we don't set custom .ini values in our PHPUnit config, and we only run CI of trusted PRs in ephemeral environments."
+            }
         }
     }
 }

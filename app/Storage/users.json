@@ -1,0 +1,12 @@
+{
+    "admin": {
+        "password": "$2y$10$82J7qBzu.ItKrE6EldZkqOBa46Di06d3y4EQGvWhu0984PNhldCdm",
+        "email": "admin@example.com",
+        "role": "admin"
+    },
+    "viewer": {
+        "password": "$2y$10$scKkzc9qOIpCKXv8uC6yUexi.0ZmAQ1q5VBrmIUGgcnNv.4kJtV8u",
+        "email": "viewer@example.com",
+        "role": "viewer"
+    }
+}

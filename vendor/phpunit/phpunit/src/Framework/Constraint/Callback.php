@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * This file is part of PHPUnit.
  *
@@ -9,54 +9,54 @@
  */
 namespace PHPUnit\Framework\Constraint;
 
-use PHPUnit\Util\InvalidArgumentHelper;
+use Closure;
+use ReflectionFunction;
 
 /**
- * Constraint that evaluates against a specified closure.
+ * @template CallbackInput of mixed
+ *
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
  */
-class Callback extends Constraint
+final class Callback extends Constraint
 {
-    private $callback;
+    /**
+     * @var callable(CallbackInput): bool
+     */
+    private readonly mixed $callback;
 
     /**
-     * @param callable $callback
-     *
-     * @throws \PHPUnit\Framework\Exception
+     * @param callable(CallbackInput $input): bool $callback
      */
-    public function __construct($callback)
+    public function __construct(callable $callback)
     {
-        if (!\is_callable($callback)) {
-            throw InvalidArgumentHelper::factory(
-                1,
-                'callable'
-            );
-        }
-
-        parent::__construct();
-
         $this->callback = $callback;
+    }
+
+    /**
+     * Returns a string representation of the constraint.
+     */
+    public function toString(): string
+    {
+        return 'is accepted by specified callback';
+    }
+
+    public function isVariadic(): bool
+    {
+        return (new ReflectionFunction(Closure::fromCallable($this->callback)))->isVariadic();
     }
 
     /**
      * Evaluates the constraint for parameter $value. Returns true if the
      * constraint is met, false otherwise.
      *
-     * @param mixed $other Value or object to evaluate.
-     *
-     * @return bool
+     * @param CallbackInput $other
      */
-    protected function matches($other)
+    protected function matches(mixed $other): bool
     {
-        return \call_user_func($this->callback, $other);
-    }
+        if ($this->isVariadic()) {
+            return ($this->callback)(...$other);
+        }
 
-    /**
-     * Returns a string representation of the constraint.
-     *
-     * @return string
-     */
-    public function toString()
-    {
-        return 'is accepted by specified callback';
+        return ($this->callback)($other);
     }
 }

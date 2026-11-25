@@ -1,14 +1,13 @@
 {
     "require-dev": {
-        "behat/behat": "2.4.*@stable"
-    },
-    "config": {
-        "bin-dir": "bin/"
+        "behat/behat": "*"
     },
     "require": {
-        "phpmailer/phpmailer": "^5.2",
-        "phpunit/phpunit": "^6.1",
-        "sendgrid/sendgrid": "~7",
-        "facebook/graph-sdk": "^5.7"
+        "phpmailer/phpmailer": "*",
+        "phpunit/phpunit": "*",
+        "sendgrid/sendgrid": "*",
+        "facebook/graph-sdk": "*",
+        "ext-mysqli" : "*",
+        "ext-json" : "*"
     }
 }

@@ -11,8 +11,6 @@
 
 namespace Symfony\Component\DependencyInjection\Loader;
 
-use Symfony\Component\Config\Resource\DirectoryResource;
-
 /**
  * DirectoryLoader is a recursive loader to go through directories.
  *
@@ -20,14 +18,11 @@ use Symfony\Component\Config\Resource\DirectoryResource;
  */
 class DirectoryLoader extends FileLoader
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function load($file, $type = null)
+    public function load(mixed $file, ?string $type = null): mixed
     {
         $file = rtrim($file, '/');
         $path = $this->locator->locate($file);
-        $this->container->addResource(new DirectoryResource($path));
+        $this->container->fileExists($path, false);
 
         foreach (scandir($path) as $dir) {
             if ('.' !== $dir[0]) {
@@ -40,17 +35,16 @@ class DirectoryLoader extends FileLoader
                 $this->import($dir, null, false, $path);
             }
         }
+
+        return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function supports($resource, $type = null)
+    public function supports(mixed $resource, ?string $type = null): bool
     {
         if ('directory' === $type) {
             return true;
         }
 
-        return null === $type && \is_string($resource) && '/' === substr($resource, -1);
+        return null === $type && \is_string($resource) && str_ends_with($resource, '/');
     }
 }

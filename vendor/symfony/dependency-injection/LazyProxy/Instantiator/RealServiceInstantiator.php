@@ -15,19 +15,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 
 /**
- * {@inheritdoc}
- *
- * Noop proxy instantiator - simply produces the real service instead of a proxy instance.
+ * Noop proxy instantiator - produces the real service instead of a proxy instance.
  *
  * @author Marco Pivetta <ocramius@gmail.com>
  */
 class RealServiceInstantiator implements InstantiatorInterface
 {
     /**
-     * {@inheritdoc}
+     * @return object The real service instance
      */
-    public function instantiateProxy(ContainerInterface $container, Definition $definition, $id, $realInstantiator)
+    public function instantiateProxy(ContainerInterface $container, Definition $definition, string $id, callable $realInstantiator): object
     {
-        return \call_user_func($realInstantiator);
+        return $realInstantiator();
     }
 }

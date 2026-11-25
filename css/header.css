@@ -1,0 +1,38 @@
+body {
+    background: #f5f7fb;
+}
+
+.sidebar {
+    background: #2f4050;
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    margin: 8px 0;
+    padding: 8px 10px;
+    border-radius: 4px;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background: #1ab394;
+    color: #fff;
+}
+
+.content {
+    padding: 25px;
+    background: #fff;
+    min-height: 100vh;
+}
+
+.page-title {
+    margin-bottom: 20px;
+}
+
+.topbar {
+    margin-bottom: 20px;
+}

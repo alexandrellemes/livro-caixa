@@ -20,20 +20,7 @@ use Symfony\Component\Translation\MessageCatalogue;
  */
 class IniFileDumper extends FileDumper
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function format(MessageCatalogue $messages, $domain = 'messages')
-    {
-        @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.8 and will be removed in 3.0. Use the formatCatalogue() method instead.', E_USER_DEPRECATED);
-
-        return $this->formatCatalogue($messages, $domain);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function formatCatalogue(MessageCatalogue $messages, $domain, array $options = array())
+    public function formatCatalogue(MessageCatalogue $messages, string $domain, array $options = []): string
     {
         $output = '';
 
@@ -45,10 +32,7 @@ class IniFileDumper extends FileDumper
         return $output;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getExtension()
+    protected function getExtension(): string
     {
         return 'ini';
     }

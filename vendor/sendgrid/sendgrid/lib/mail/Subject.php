@@ -1,18 +1,11 @@
 <?php
 /**
  * This helper builds the Subject object for a /mail/send API call
- *
- * PHP Version - 5.6, 7.0, 7.1, 7.2
- *
- * @package   SendGrid\Mail
- * @author    Elmer Thomas <dx@sendgrid.com>
- * @copyright 2018-19 Twilio SendGrid
- * @license   https://opensource.org/licenses/MIT The MIT License
- * @version   GIT: <git_id>
- * @link      http://packagist.org/packages/sendgrid/sendgrid
  */
 
 namespace SendGrid\Mail;
+
+use SendGrid\Helper\Assert;
 
 /**
  * This class is used to construct a Subject object for the /mail/send API call
@@ -24,12 +17,13 @@ class Subject implements \JsonSerializable
     /** @var $subject string The email subject */
     private $subject;
 
-	/**
-	 * Optional constructor
-	 *
-	 * @param string|null $subject The email subject
-	 * @throws \SendGrid\Mail\TypeException
-	 */
+    /**
+     * Optional constructor
+     *
+     * @param string|null $subject The email subject
+     *
+     * @throws TypeException
+     */
     public function __construct($subject = null)
     {
         if (isset($subject)) {
@@ -42,13 +36,11 @@ class Subject implements \JsonSerializable
      *
      * @param string $subject The email subject
      *
-     * @throws \SendGrid\Mail\TypeException
+     * @throws TypeException
      */
     public function setSubject($subject)
     {
-        if (!is_string($subject)) {
-            throw new TypeException('$subject must be of type string.');
-        }
+        Assert::minLength($subject, 'subject', 1);
 
         $this->subject = $subject;
     }
@@ -60,7 +52,7 @@ class Subject implements \JsonSerializable
      */
     public function getSubject()
     {
-        return mb_convert_encoding($this->subject, 'UTF-8', 'UTF-8');
+        return mb_convert_encoding((string)$this->subject, 'UTF-8', 'UTF-8');
     }
 
     /**
@@ -68,6 +60,7 @@ class Subject implements \JsonSerializable
      *
      * @return string
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->getSubject();

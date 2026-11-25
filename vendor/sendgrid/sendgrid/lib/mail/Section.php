@@ -1,18 +1,11 @@
 <?php
 /**
  * This helper builds the Section object for a /mail/send API call
- *
- * PHP Version - 5.6, 7.0, 7.1, 7.2
- *
- * @package   SendGrid\Mail
- * @author    Elmer Thomas <dx@sendgrid.com>
- * @copyright 2018-19 Twilio SendGrid
- * @license   https://opensource.org/licenses/MIT The MIT License
- * @version   GIT: <git_id>
- * @link      http://packagist.org/packages/sendgrid/sendgrid
  */
 
 namespace SendGrid\Mail;
+
+use SendGrid\Helper\Assert;
 
 /**
  * This class is used to construct a Section object for the /mail/send API call
@@ -29,13 +22,13 @@ class Section implements \JsonSerializable
     /** @var $value string Section value */
     private $value;
 
-	/**
-	 * Optional constructor
-	 *
-	 * @param string|null $key   Section key
-	 * @param string|null $value Section value
-	 * @throws \SendGrid\Mail\TypeException
-	 */
+    /**
+     * Optional constructor
+     *
+     * @param string|null $key   Section key
+     * @param string|null $value Section value
+     * @throws \SendGrid\Mail\TypeException
+     */
     public function __construct($key = null, $value = null)
     {
         if (isset($key)) {
@@ -55,9 +48,8 @@ class Section implements \JsonSerializable
      */
     public function setKey($key)
     {
-        if (!is_string($key)) {
-            throw new TypeException('$key must be of type string.');
-        }
+        Assert::string($key, 'key');
+
         $this->key = $key;
     }
 
@@ -80,9 +72,8 @@ class Section implements \JsonSerializable
      */
     public function setValue($value)
     {
-        if (!is_string($value)) {
-            throw new TypeException('$value must be of type string.');
-        }
+        Assert::string($value, 'value');
+
         $this->value = $value;
     }
 
@@ -101,6 +92,7 @@ class Section implements \JsonSerializable
      *
      * @return null|array
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return array_filter(

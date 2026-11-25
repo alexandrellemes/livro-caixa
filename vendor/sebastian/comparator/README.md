@@ -1,6 +1,8 @@
-[![Build Status](https://travis-ci.org/sebastianbergmann/comparator.svg?branch=master)](https://travis-ci.org/sebastianbergmann/comparator)
+[![Latest Stable Version](https://poser.pugx.org/sebastian/comparator/v)](https://packagist.org/packages/sebastian/comparator)
+[![CI Status](https://github.com/sebastianbergmann/comparator/workflows/CI/badge.svg)](https://github.com/sebastianbergmann/comparator/actions)
+[![codecov](https://codecov.io/gh/sebastianbergmann/comparator/branch/main/graph/badge.svg)](https://codecov.io/gh/sebastianbergmann/comparator)
 
-# Comparator
+# sebastian/comparator
 
 This component provides the functionality to compare PHP values for equality.
 
@@ -8,11 +10,15 @@ This component provides the functionality to compare PHP values for equality.
 
 You can add this library as a local, per-project dependency to your project using [Composer](https://getcomposer.org/):
 
-    composer require sebastian/comparator
+```
+composer require sebastian/comparator
+```
 
 If you only need this library during development, for instance to run your project's test suite, then you should add it as a development-time dependency:
 
-    composer require --dev sebastian/comparator
+```
+composer require --dev sebastian/comparator
+```
 
 ## Usage
 
@@ -34,4 +40,3 @@ try {
     print "Dates don't match";
 }
 ```
-

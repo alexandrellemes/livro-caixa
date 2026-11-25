@@ -1,158 +1,110 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * This file is part of the File_Iterator package.
+ * This file is part of phpunit/php-file-iterator.
  *
  * (c) Sebastian Bergmann <sebastian@phpunit.de>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+namespace SebastianBergmann\FileIterator;
+
+use function preg_match;
+use function realpath;
+use function str_ends_with;
+use function str_replace;
+use function str_starts_with;
+use FilterIterator;
+use SplFileInfo;
 
 /**
- * FilterIterator implementation that filters files based on prefix(es) and/or
- * suffix(es). Hidden files and files from hidden directories are also filtered.
+ * @template-extends FilterIterator<int, SplFileInfo, \Iterator>
  *
- * @since     Class available since Release 1.0.0
+ * @internal This class is not covered by the backward compatibility promise for phpunit/php-file-iterator
  */
-class File_Iterator extends FilterIterator
+final class Iterator extends FilterIterator
 {
-    const PREFIX = 0;
-    const SUFFIX = 1;
+    public const PREFIX = 0;
+    public const SUFFIX = 1;
+    private false|string $basePath;
 
     /**
-     * @var array
+     * @var list<string>
      */
-    protected $suffixes = array();
+    private array $suffixes;
 
     /**
-     * @var array
+     * @var list<string>
      */
-    protected $prefixes = array();
+    private array $prefixes;
 
     /**
-     * @var array
+     * @param list<string> $suffixes
+     * @param list<string> $prefixes
      */
-    protected $exclude = array();
-
-    /**
-     * @var string
-     */
-    protected $basepath;
-
-    /**
-     * @param Iterator $iterator
-     * @param array    $suffixes
-     * @param array    $prefixes
-     * @param array    $exclude
-     * @param string   $basepath
-     */
-    public function __construct(Iterator $iterator, array $suffixes = array(), array $prefixes = array(), array $exclude = array(), $basepath = NULL)
+    public function __construct(string $basePath, \Iterator $iterator, array $suffixes = [], array $prefixes = [])
     {
-        $exclude = array_filter(array_map('realpath', $exclude));
-
-        if ($basepath !== NULL) {
-            $basepath = realpath($basepath);
-        }
-
-        if ($basepath === FALSE) {
-            $basepath = NULL;
-        } else {
-            foreach ($exclude as &$_exclude) {
-                $_exclude = str_replace($basepath, '', $_exclude);
-            }
-        }
-
+        $this->basePath = realpath($basePath);
         $this->prefixes = $prefixes;
         $this->suffixes = $suffixes;
-        $this->exclude  = $exclude;
-        $this->basepath = $basepath;
 
         parent::__construct($iterator);
     }
 
-    /**
-     * @return bool
-     */
-    public function accept()
+    public function accept(): bool
     {
-        $current  = $this->getInnerIterator()->current();
+        $current = $this->getInnerIterator()->current();
+
         $filename = $current->getFilename();
-        $realpath = $current->getRealPath();
+        $realPath = $current->getRealPath();
 
-        if ($this->basepath !== NULL) {
-            $realpath = str_replace($this->basepath, '', $realpath);
+        if ($realPath === false) {
+            // @codeCoverageIgnoreStart
+            return false;
+            // @codeCoverageIgnoreEnd
         }
 
-        // Filter files in hidden directories.
-        if (preg_match('=/\.[^/]*/=', $realpath)) {
-            return FALSE;
-        }
-
-        return $this->acceptPath($realpath) &&
+        return $this->acceptPath($realPath) &&
                $this->acceptPrefix($filename) &&
                $this->acceptSuffix($filename);
     }
 
-    /**
-     * @param  string $path
-     * @return bool
-     * @since  Method available since Release 1.1.0
-     */
-    protected function acceptPath($path)
+    private function acceptPath(string $path): bool
     {
-        foreach ($this->exclude as $exclude) {
-            if (strpos($path, $exclude) === 0) {
-                return FALSE;
-            }
+        // Filter files in hidden directories by checking path that is relative to the base path.
+        if (preg_match('=/\.[^/]*/=', str_replace((string) $this->basePath, '', $path))) {
+            return false;
         }
 
-        return TRUE;
+        return true;
     }
 
-    /**
-     * @param  string $filename
-     * @return bool
-     * @since  Method available since Release 1.1.0
-     */
-    protected function acceptPrefix($filename)
+    private function acceptPrefix(string $filename): bool
     {
         return $this->acceptSubString($filename, $this->prefixes, self::PREFIX);
     }
 
-    /**
-     * @param  string $filename
-     * @return bool
-     * @since  Method available since Release 1.1.0
-     */
-    protected function acceptSuffix($filename)
+    private function acceptSuffix(string $filename): bool
     {
         return $this->acceptSubString($filename, $this->suffixes, self::SUFFIX);
     }
 
     /**
-     * @param  string $filename
-     * @param  array  $subStrings
-     * @param  int    $type
-     * @return bool
-     * @since  Method available since Release 1.1.0
+     * @param list<string> $subStrings
      */
-    protected function acceptSubString($filename, array $subStrings, $type)
+    private function acceptSubString(string $filename, array $subStrings, int $type): bool
     {
         if (empty($subStrings)) {
-            return TRUE;
+            return true;
         }
 
-        $matched = FALSE;
-
         foreach ($subStrings as $string) {
-            if (($type == self::PREFIX && strpos($filename, $string) === 0) ||
-                ($type == self::SUFFIX &&
-                 substr($filename, -1 * strlen($string)) == $string)) {
-                $matched = TRUE;
-                break;
+            if (($type === self::PREFIX && str_starts_with($filename, $string)) ||
+                ($type === self::SUFFIX && str_ends_with($filename, $string))) {
+                return true;
             }
         }
 
-        return $matched;
+        return false;
     }
 }

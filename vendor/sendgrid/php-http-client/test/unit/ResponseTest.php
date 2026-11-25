@@ -2,23 +2,24 @@
 
 namespace SendGrid\Test;
 
+use PHPUnit\Framework\TestCase;
 use SendGrid\Response;
 
-class ResponseTest extends \PHPUnit_Framework_TestCase
+class ResponseTest extends TestCase
 {
     public function testConstructor()
     {
         $response = new Response();
-        
-        $this->assertAttributeEquals(200, 'statusCode', $response);
-        $this->assertAttributeEquals('', 'body', $response);
-        $this->assertAttributeEquals([], 'headers', $response);
+
+        $this->assertEquals(200, $response->statusCode());
+        $this->assertEquals('', $response->body());
+        $this->assertEquals([], $response->headers());
 
         $response = new Response(201, 'test', ['Content-Encoding: gzip']);
 
-        $this->assertAttributeEquals(201, 'statusCode', $response);
-        $this->assertAttributeEquals('test', 'body', $response);
-        $this->assertAttributeEquals(['Content-Encoding: gzip'], 'headers', $response);
+        $this->assertEquals(201, $response->statusCode());
+        $this->assertEquals('test', $response->body());
+        $this->assertEquals(['Content-Encoding: gzip'], $response->headers());
     }
 
     public function testStatusCode()
@@ -41,11 +42,11 @@ class ResponseTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(['Content-Type: text/html'], $response->headers());
     }
-    
+
     public function testAssociativeHeaders()
     {
         $response = new Response(null, null, ['Content-Type: text/html', 'HTTP/1.1 200 OK']);
-        
+
         $this->assertEquals(['Content-Type' => 'text/html', 'Status' => 'HTTP/1.1 200 OK'], $response->headers(true));
     }
 }

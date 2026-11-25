@@ -1,29 +1,25 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * This file is part of the php-code-coverage package.
+ * This file is part of phpunit/php-code-coverage.
  *
  * (c) Sebastian Bergmann <sebastian@phpunit.de>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace SebastianBergmann\CodeCoverage;
 
+use function dirname;
 use SebastianBergmann\Version as VersionId;
 
-class Version
+final class Version
 {
-    private static $version;
+    private static string $version = '';
 
-    /**
-     * @return string
-     */
-    public static function id()
+    public static function id(): string
     {
-        if (self::$version === null) {
-            $version       = new VersionId('5.3.2', \dirname(__DIR__));
-            self::$version = $version->getVersion();
+        if (self::$version === '') {
+            self::$version = (new VersionId('11.0.12', dirname(__DIR__)))->asString();
         }
 
         return self::$version;

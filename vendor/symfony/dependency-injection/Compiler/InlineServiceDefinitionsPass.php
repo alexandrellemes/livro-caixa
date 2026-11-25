@@ -11,9 +11,10 @@
 
 namespace Symfony\Component\DependencyInjection\Compiler;
 
+use Symfony\Component\DependencyInjection\Argument\ArgumentInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -21,128 +22,213 @@ use Symfony\Component\DependencyInjection\Reference;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class InlineServiceDefinitionsPass implements RepeatablePassInterface
+class InlineServiceDefinitionsPass extends AbstractRecursivePass
 {
-    private $graph;
-    private $compiler;
-    private $formatter;
-    private $currentId;
+    protected bool $skipScalars = true;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setRepeatedPass(RepeatedPass $repeatedPass)
-    {
-        // no-op for BC
+    private array $cloningIds = [];
+    private array $connectedIds = [];
+    private array $notInlinedIds = [];
+    private array $inlinedIds = [];
+    private array $notInlinableIds = [];
+    private array $autowireInline = [];
+    private ?ServiceReferenceGraph $graph = null;
+
+    public function __construct(
+        private ?AnalyzeServiceReferencesPass $analyzingPass = null,
+    ) {
     }
 
-    /**
-     * Processes the ContainerBuilder for inline service definitions.
-     */
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
-        $this->compiler = $container->getCompiler();
-        $this->formatter = $this->compiler->getLoggingFormatter();
-        $this->graph = $this->compiler->getServiceReferenceGraph();
-
-        $container->setDefinitions($this->inlineArguments($container, $container->getDefinitions(), true));
-    }
-
-    /**
-     * Processes inline arguments.
-     *
-     * @param ContainerBuilder $container The ContainerBuilder
-     * @param array            $arguments An array of arguments
-     * @param bool             $isRoot    If we are processing the root definitions or not
-     *
-     * @return array
-     */
-    private function inlineArguments(ContainerBuilder $container, array $arguments, $isRoot = false)
-    {
-        foreach ($arguments as $k => $argument) {
-            if ($isRoot) {
-                $this->currentId = $k;
+        $this->container = $container;
+        if ($this->analyzingPass) {
+            $analyzedContainer = new ContainerBuilder();
+            $analyzedContainer->setAliases($container->getAliases());
+            $analyzedContainer->setDefinitions($container->getDefinitions());
+            foreach ($container->getExpressionLanguageProviders() as $provider) {
+                $analyzedContainer->addExpressionLanguageProvider($provider);
             }
-            if (\is_array($argument)) {
-                $arguments[$k] = $this->inlineArguments($container, $argument);
-            } elseif ($argument instanceof Reference) {
-                if (!$container->hasDefinition($id = (string) $argument)) {
+        } else {
+            $analyzedContainer = $container;
+        }
+        try {
+            $notInlinableIds = [];
+            $remainingInlinedIds = [];
+            $this->connectedIds = $this->notInlinedIds = $container->getDefinitions();
+            do {
+                if ($this->analyzingPass) {
+                    $analyzedContainer->setDefinitions(array_intersect_key($analyzedContainer->getDefinitions(), $this->connectedIds));
+                    $this->analyzingPass->process($analyzedContainer);
+                }
+                $this->graph = $analyzedContainer->getCompiler()->getServiceReferenceGraph();
+                $notInlinedIds = $this->notInlinedIds;
+                $notInlinableIds += $this->notInlinableIds;
+                $this->connectedIds = $this->notInlinedIds = $this->inlinedIds = $this->notInlinableIds = [];
+
+                foreach ($analyzedContainer->getDefinitions() as $id => $definition) {
+                    if (!$this->graph->hasNode($id)) {
+                        continue;
+                    }
+                    if ($definition->isPublic()) {
+                        $this->connectedIds[$id] = true;
+                    }
+                    foreach ($this->graph->getNode($id)->getOutEdges() as $edge) {
+                        if (isset($notInlinedIds[$edge->getSourceNode()->getId()])) {
+                            $this->currentId = $id;
+                            $this->processValue($definition, true);
+                            break;
+                        }
+                    }
+                }
+
+                foreach ($this->inlinedIds as $id => $isPublicOrNotShared) {
+                    if ($isPublicOrNotShared) {
+                        $remainingInlinedIds[$id] = $id;
+                    } else {
+                        $container->removeDefinition($id);
+                        if (!isset($this->autowireInline[$id])) {
+                            $analyzedContainer->removeDefinition($id);
+                        }
+                    }
+                }
+            } while ($this->inlinedIds && $this->analyzingPass);
+
+            foreach ($remainingInlinedIds as $id) {
+                if (isset($notInlinableIds[$id])) {
                     continue;
                 }
 
-                if ($this->isInlineableDefinition($container, $id, $definition = $container->getDefinition($id))) {
-                    $this->compiler->addLogMessage($this->formatter->formatInlineService($this, $id, $this->currentId));
+                $definition = $container->getDefinition($id);
 
-                    if ($definition->isShared() && ContainerInterface::SCOPE_PROTOTYPE !== $definition->getScope(false)) {
-                        $arguments[$k] = $definition;
-                    } else {
-                        $arguments[$k] = clone $definition;
-                    }
+                if (!$definition->isShared() && !$definition->isPublic()) {
+                    $container->removeDefinition($id);
                 }
-            } elseif ($argument instanceof Definition) {
-                $argument->setArguments($this->inlineArguments($container, $argument->getArguments()));
-                $argument->setMethodCalls($this->inlineArguments($container, $argument->getMethodCalls()));
-                $argument->setProperties($this->inlineArguments($container, $argument->getProperties()));
-
-                $configurator = $this->inlineArguments($container, array($argument->getConfigurator()));
-                $argument->setConfigurator($configurator[0]);
-
-                $factory = $this->inlineArguments($container, array($argument->getFactory()));
-                $argument->setFactory($factory[0]);
             }
+        } finally {
+            $this->container = null;
+            $this->connectedIds = $this->notInlinedIds = $this->inlinedIds = [];
+            $this->notInlinableIds = [];
+            $this->graph = null;
+        }
+    }
+
+    protected function processValue(mixed $value, bool $isRoot = false): mixed
+    {
+        if ($value instanceof ArgumentInterface) {
+            // References found in ArgumentInterface::getValues() are not inlineable
+            return $value;
         }
 
-        return $arguments;
+        if ($value instanceof Definition && $this->cloningIds) {
+            if ($value->isShared()) {
+                return $value;
+            }
+            $value = clone $value;
+        }
+
+        if (!$value instanceof Reference) {
+            return parent::processValue($value, $isRoot);
+        } elseif (!$this->container->hasDefinition($id = (string) $value)) {
+            return $value;
+        }
+
+        $definition = $this->container->getDefinition($id);
+
+        if (isset($this->notInlinableIds[$id]) || !$this->isInlineableDefinition($id, $definition)) {
+            if ($this->currentId !== $id) {
+                $this->notInlinableIds[$id] = true;
+            }
+
+            return $value;
+        }
+
+        $this->container->log($this, \sprintf('Inlined service "%s" to "%s".', $id, $this->currentId));
+        $this->inlinedIds[$id] = $definition->isPublic() || !$definition->isShared();
+        $this->notInlinedIds[$this->currentId ?? ''] = true;
+
+        if ($definition->isShared()) {
+            return $definition;
+        }
+
+        if (isset($this->cloningIds[$id])) {
+            $ids = array_keys($this->cloningIds);
+            $ids[] = $id;
+
+            throw new ServiceCircularReferenceException($id, \array_slice($ids, array_search($id, $ids)));
+        }
+
+        $this->cloningIds[$id] = true;
+        try {
+            return $this->processValue($definition);
+        } finally {
+            unset($this->cloningIds[$id]);
+        }
     }
 
     /**
      * Checks if the definition is inlineable.
-     *
-     * @param ContainerBuilder $container
-     * @param string           $id
-     * @param Definition       $definition
-     *
-     * @return bool If the definition is inlineable
      */
-    private function isInlineableDefinition(ContainerBuilder $container, $id, Definition $definition)
+    private function isInlineableDefinition(string $id, Definition $definition): bool
     {
-        if ($definition->isDeprecated() || $definition->isLazy() || $definition->isSynthetic()) {
+        if (str_starts_with($id, '.autowire_inline.')) {
+            $this->autowireInline[$id] = true;
+
+            return true;
+        }
+        if ($definition->hasErrors() || $definition->isDeprecated() || $definition->isLazy() || $definition->isSynthetic() || $definition->hasTag('container.do_not_inline')) {
             return false;
         }
 
-        if (!$definition->isShared() || ContainerInterface::SCOPE_PROTOTYPE === $definition->getScope(false)) {
+        if (!$definition->isShared()) {
+            if (!$this->graph->hasNode($id)) {
+                return true;
+            }
+
+            foreach ($this->graph->getNode($id)->getInEdges() as $edge) {
+                $srcId = $edge->getSourceNode()->getId();
+                $this->connectedIds[$srcId] = true;
+                if ($edge->isWeak() || $edge->isLazy()) {
+                    return !$this->connectedIds[$id] = true;
+                }
+            }
+
             return true;
         }
 
-        if ($definition->isPublic()) {
+        if ($definition->isPublic()
+            || $this->currentId === $id
+            || !$this->graph->hasNode($id)
+        ) {
             return false;
         }
 
-        if (!$this->graph->hasNode($id)) {
-            return true;
-        }
+        $this->connectedIds[$id] = true;
 
-        if ($this->currentId == $id) {
-            return false;
-        }
-
-        $ids = array();
+        $srcIds = [];
+        $srcCount = 0;
         foreach ($this->graph->getNode($id)->getInEdges() as $edge) {
-            $ids[] = $edge->getSourceNode()->getId();
+            $srcId = $edge->getSourceNode()->getId();
+            $this->connectedIds[$srcId] = true;
+            if ($edge->isWeak() || $edge->isLazy()) {
+                return false;
+            }
+            $srcIds[$srcId] = true;
+            ++$srcCount;
         }
 
-        if (\count(array_unique($ids)) > 1) {
+        if (1 !== \count($srcIds)) {
+            $this->notInlinedIds[$id] = true;
+
             return false;
         }
 
-        if (\count($ids) > 1 && \is_array($factory = $definition->getFactory()) && ($factory[0] instanceof Reference || $factory[0] instanceof Definition)) {
+        if ($srcCount > 1 && \is_array($factory = $definition->getFactory()) && ($factory[0] instanceof Reference || $factory[0] instanceof Definition)) {
             return false;
         }
 
-        if (\count($ids) > 1 && $definition->getFactoryService(false)) {
-            return false;
-        }
+        $srcDefinition = $this->container->getDefinition($srcId);
 
-        return $container->getDefinition(reset($ids))->getScope(false) === $definition->getScope(false);
+        return $srcDefinition->isShared() && !$srcDefinition->isLazy();
     }
 }

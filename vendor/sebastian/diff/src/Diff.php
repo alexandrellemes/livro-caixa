@@ -7,30 +7,36 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace SebastianBergmann\Diff;
 
-final class Diff
+use ArrayIterator;
+use IteratorAggregate;
+use Traversable;
+
+/**
+ * @template-implements IteratorAggregate<int, Chunk>
+ */
+final class Diff implements IteratorAggregate
 {
     /**
-     * @var string
+     * @var non-empty-string
      */
-    private $from;
+    private string $from;
 
     /**
-     * @var string
+     * @var non-empty-string
      */
-    private $to;
+    private string $to;
 
     /**
-     * @var Chunk[]
+     * @var list<Chunk>
      */
-    private $chunks;
+    private array $chunks;
 
     /**
-     * @param string  $from
-     * @param string  $to
-     * @param Chunk[] $chunks
+     * @param non-empty-string $from
+     * @param non-empty-string $to
+     * @param list<Chunk>      $chunks
      */
     public function __construct(string $from, string $to, array $chunks = [])
     {
@@ -39,29 +45,40 @@ final class Diff
         $this->chunks = $chunks;
     }
 
-    public function getFrom(): string
+    /**
+     * @return non-empty-string
+     */
+    public function from(): string
     {
         return $this->from;
     }
 
-    public function getTo(): string
+    /**
+     * @return non-empty-string
+     */
+    public function to(): string
     {
         return $this->to;
     }
 
     /**
-     * @return Chunk[]
+     * @return list<Chunk>
      */
-    public function getChunks(): array
+    public function chunks(): array
     {
         return $this->chunks;
     }
 
     /**
-     * @param Chunk[] $chunks
+     * @param list<Chunk> $chunks
      */
-    public function setChunks(array $chunks)
+    public function setChunks(array $chunks): void
     {
         $this->chunks = $chunks;
+    }
+
+    public function getIterator(): Traversable
+    {
+        return new ArrayIterator($this->chunks);
     }
 }

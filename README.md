@@ -69,8 +69,12 @@ Acesse a pasta raiz do projeto, edite o arquivo '.env' e altere as configuraçõ
 Dados de acesso
 
 Email: admin@admin.com
-
 Senha: 123456
+
+ou
+
+Usuário: admin
+Senha: 123
 
 ---------------------------------------
 

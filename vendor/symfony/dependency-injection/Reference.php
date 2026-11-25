@@ -18,57 +18,38 @@ namespace Symfony\Component\DependencyInjection;
  */
 class Reference
 {
-    private $id;
-    private $invalidBehavior;
-    private $strict;
-
-    /**
-     * Note: The $strict parameter is deprecated since version 2.8 and will be removed in 3.0.
-     *
-     * @param string $id              The service identifier
-     * @param int    $invalidBehavior The behavior when the service does not exist
-     * @param bool   $strict          Sets how this reference is validated
-     *
-     * @see Container
-     */
-    public function __construct($id, $invalidBehavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE, $strict = true)
-    {
-        $this->id = strtolower($id);
-        $this->invalidBehavior = $invalidBehavior;
-        $this->strict = $strict;
+    public function __construct(
+        private string $id,
+        private int $invalidBehavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+    ) {
     }
 
-    /**
-     * @return string The service identifier
-     */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->id;
     }
 
     /**
      * Returns the behavior to be used when the service does not exist.
-     *
-     * @return int
      */
-    public function getInvalidBehavior()
+    public function getInvalidBehavior(): int
     {
-        return $this->invalidBehavior;
+        return $this->invalidBehavior ??= ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE;
     }
 
-    /**
-     * Returns true when this Reference is strict.
-     *
-     * @return bool
-     *
-     * @deprecated since version 2.8, to be removed in 3.0.
-     */
-    public function isStrict($triggerDeprecationError = true)
+    public function __serialize(): array
     {
-        if ($triggerDeprecationError) {
-            @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
+        $data = [];
+        foreach ((array) $this as $k => $v) {
+            if (false !== $i = strrpos($k, "\0")) {
+                $k = substr($k, 1 + $i);
+            }
+            if ('invalidBehavior' === $k && ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE === $v) {
+                continue;
+            }
+            $data[$k] = $v;
         }
 
-        return $this->strict;
+        return $data;
     }
 }

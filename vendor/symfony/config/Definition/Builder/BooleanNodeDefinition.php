@@ -12,43 +12,49 @@
 namespace Symfony\Component\Config\Definition\Builder;
 
 use Symfony\Component\Config\Definition\BooleanNode;
+use Symfony\Component\Config\Definition\Exception\InvalidDefinitionException;
 
 /**
  * This class provides a fluent interface for defining a node.
+ *
+ * @template TParent of NodeParentInterface|null
+ *
+ * @extends ScalarNodeDefinition<TParent>
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 class BooleanNodeDefinition extends ScalarNodeDefinition
 {
     /**
-     * {@inheritdoc}
+     * @param TParent $parent
      */
-    public function __construct($name, NodeParentInterface $parent = null)
+    public function __construct(?string $name, ?NodeParentInterface $parent = null)
     {
         parent::__construct($name, $parent);
 
         $this->nullEquivalent = true;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @deprecated Deprecated since version 2.8, to be removed in 3.0.
-     */
-    public function cannotBeEmpty()
+    protected function instantiateNode(): BooleanNode
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
-
-        return parent::cannotBeEmpty();
+        return new BooleanNode($this->name, $this->parent, $this->pathSeparator, null === $this->nullEquivalent);
     }
 
     /**
-     * Instantiate a Node.
-     *
-     * @return BooleanNode The node
+     * @throws InvalidDefinitionException
      */
-    protected function instantiateNode()
+    public function cannotBeEmpty(): static
     {
-        return new BooleanNode($this->name, $this->parent);
+        throw new InvalidDefinitionException('->cannotBeEmpty() is not applicable to BooleanNodeDefinition.');
+    }
+
+    /**
+     * @return $this
+     */
+    public function defaultValue(mixed $value): static
+    {
+        $this->nullEquivalent = null === $value ? null : true;
+
+        return parent::defaultValue($value);
     }
 }

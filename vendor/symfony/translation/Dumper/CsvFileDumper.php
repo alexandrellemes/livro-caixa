@@ -20,28 +20,15 @@ use Symfony\Component\Translation\MessageCatalogue;
  */
 class CsvFileDumper extends FileDumper
 {
-    private $delimiter = ';';
-    private $enclosure = '"';
+    private string $delimiter = ';';
+    private string $enclosure = '"';
 
-    /**
-     * {@inheritdoc}
-     */
-    public function format(MessageCatalogue $messages, $domain = 'messages')
+    public function formatCatalogue(MessageCatalogue $messages, string $domain, array $options = []): string
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.8 and will be removed in 3.0. Use the formatCatalogue() method instead.', E_USER_DEPRECATED);
-
-        return $this->formatCatalogue($messages, $domain);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function formatCatalogue(MessageCatalogue $messages, $domain, array $options = array())
-    {
-        $handle = fopen('php://memory', 'r+b');
+        $handle = fopen('php://memory', 'r+');
 
         foreach ($messages->all($domain) as $source => $target) {
-            fputcsv($handle, array($source, $target), $this->delimiter, $this->enclosure);
+            fputcsv($handle, [$source, $target], $this->delimiter, $this->enclosure, '\\');
         }
 
         rewind($handle);
@@ -53,20 +40,14 @@ class CsvFileDumper extends FileDumper
 
     /**
      * Sets the delimiter and escape character for CSV.
-     *
-     * @param string $delimiter Delimiter character
-     * @param string $enclosure Enclosure character
      */
-    public function setCsvControl($delimiter = ';', $enclosure = '"')
+    public function setCsvControl(string $delimiter = ';', string $enclosure = '"'): void
     {
         $this->delimiter = $delimiter;
         $this->enclosure = $enclosure;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getExtension()
+    protected function getExtension(): string
     {
         return 'csv';
     }

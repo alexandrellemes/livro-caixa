@@ -16,17 +16,16 @@ use Symfony\Component\Config\Definition\FloatNode;
 /**
  * This class provides a fluent interface for defining a float node.
  *
+ * @template TParent of NodeParentInterface|null = null
+ *
+ * @extends NumericNodeDefinition<TParent>
+ *
  * @author Jeanmonod David <david.jeanmonod@gmail.com>
  */
 class FloatNodeDefinition extends NumericNodeDefinition
 {
-    /**
-     * Instantiates a Node.
-     *
-     * @return FloatNode The node
-     */
-    protected function instantiateNode()
+    protected function instantiateNode(): FloatNode
     {
-        return new FloatNode($this->name, $this->parent, $this->min, $this->max);
+        return new FloatNode($this->name, $this->parent, $this->min, $this->max, $this->pathSeparator);
     }
 }

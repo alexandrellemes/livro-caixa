@@ -1,20 +1,5 @@
 <?php
 
-namespace Behat\Behat\Tester;
-
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\Event;
-
-use Behat\Gherkin\Node\NodeVisitorInterface,
-    Behat\Gherkin\Node\AbstractNode,
-    Behat\Gherkin\Node\BackgroundNode,
-    Behat\Gherkin\Node\OutlineNode,
-    Behat\Gherkin\Node\ScenarioNode,
-    Behat\Gherkin\Node\StepNode;
-
-use Behat\Behat\Context\ContextInterface,
-    Behat\Behat\Event\ScenarioEvent;
-
 /*
  * This file is part of the Behat.
  * (c) Konstantin Kudryashov <ever.zet@gmail.com>
@@ -23,128 +8,46 @@ use Behat\Behat\Context\ContextInterface,
  * file that was distributed with this source code.
  */
 
+namespace Behat\Behat\Tester;
+
+use Behat\Gherkin\Node\FeatureNode;
+use Behat\Gherkin\Node\ScenarioInterface as Scenario;
+use Behat\Testwork\Environment\Environment;
+use Behat\Testwork\Tester\Result\TestResult;
+use Behat\Testwork\Tester\Setup\Setup;
+use Behat\Testwork\Tester\Setup\Teardown;
+
 /**
- * Scenario Tester.
+ * Prepares and tests provided scenario object against provided environment.
  *
  * @author Konstantin Kudryashov <ever.zet@gmail.com>
  */
-class ScenarioTester implements NodeVisitorInterface
+interface ScenarioTester
 {
-    protected $container;
-    protected $dispatcher;
-    private $context;
-    private $skip = false;
+    /**
+     * Sets up example for a test.
+     *
+     * @param bool     $skip
+     *
+     * @return Setup
+     */
+    public function setUp(Environment $env, FeatureNode $feature, Scenario $scenario, $skip);
 
     /**
-     * Initializes tester.
+     * Tests example.
      *
-     * @param ContainerInterface $container
+     * @param bool     $skip
+     *
+     * @return TestResult
      */
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container  = $container;
-        $this->dispatcher = $container->get('behat.event_dispatcher');
-        $this->context    = $container->get('behat.context.dispatcher')->createContext();
-    }
+    public function test(Environment $env, FeatureNode $feature, Scenario $scenario, $skip);
 
     /**
-     * Sets tester to dry-run mode.
+     * Tears down example after a test.
      *
-     * @param Boolean $skip
+     * @param bool     $skip
+     *
+     * @return Teardown
      */
-    public function setSkip($skip = true)
-    {
-        $this->skip = (bool) $skip;
-    }
-
-    /**
-     * Visits & tests ScenarioNode.
-     *
-     * @param AbstractNode $scenario
-     *
-     * @return integer
-     */
-    public function visit(AbstractNode $scenario)
-    {
-        $this->dispatcher->dispatch('beforeScenario', new ScenarioEvent($scenario, $this->context));
-
-        $result = 0;
-        $skip   = false;
-
-        // Visit & test background if has one
-        if ($scenario->getFeature()->hasBackground()) {
-            $bgResult = $this->visitBackground(
-                $scenario->getFeature()->getBackground(), $scenario, $this->context
-            );
-            if (0 !== $bgResult) {
-                $skip = true;
-            }
-            $result = max($result, $bgResult);
-        }
-
-        // Visit & test steps
-        foreach ($scenario->getSteps() as $step) {
-            $stResult = $this->visitStep($step, $scenario, $this->context, array(), $skip);
-            if (0 !== $stResult) {
-                $skip = true;
-            }
-            $result = max($result, $stResult);
-        }
-
-        $this->dispatcher->dispatch('afterScenario', new ScenarioEvent(
-            $scenario, $this->context, $result, $skip
-        ));
-
-        return $result;
-    }
-
-    /**
-     * Visits & tests BackgroundNode.
-     *
-     * @param BackgroundNode   $background
-     * @param ScenarioNode     $logicalParent
-     * @param ContextInterface $context
-     *
-     * @see BackgroundTester::visit()
-     *
-     * @return integer
-     */
-    protected function visitBackground(BackgroundNode $background, ScenarioNode $logicalParent,
-                                       ContextInterface $context)
-    {
-        $tester = $this->container->get('behat.tester.background');
-        $tester->setLogicalParent($logicalParent);
-        $tester->setContext($context);
-        $tester->setSkip($this->skip);
-
-        return $background->accept($tester);
-    }
-
-    /**
-     * Visits & tests StepNode.
-     *
-     * @param StepNode         $step          step instance
-     * @param ScenarioNode     $logicalParent logical parent of the step
-     * @param ContextInterface $context       context instance
-     * @param array            $tokens        step replacements for tokens
-     * @param boolean          $skip          mark step as skipped?
-     *
-     * @see StepTester::visit()
-     *
-     * @return integer
-     */
-    protected function visitStep(StepNode $step, ScenarioNode $logicalParent,
-                                 ContextInterface $context, array $tokens = array(), $skip = false)
-    {
-        if ($logicalParent instanceof OutlineNode) {
-            $step = $step->createExampleRowStep($tokens);
-        }
-
-        $tester = $this->container->get('behat.tester.step');
-        $tester->setLogicalParent($logicalParent);
-        $tester->setContext($context);
-        $tester->skip($skip || $this->skip);
-
-        return $step->accept($tester);
-    }
+    public function tearDown(Environment $env, FeatureNode $feature, Scenario $scenario, $skip, TestResult $result);
 }
